@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>shaders/frag.spv</file>
+        <file>shaders/vert.spv</file>
+        <file>textures/texture.jpg</file>
+    </qresource>
+</RCC>
