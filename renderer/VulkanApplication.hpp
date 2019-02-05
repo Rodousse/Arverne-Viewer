@@ -5,6 +5,9 @@
 #include <string>
 #include <memory>
 
+namespace renderer
+{
+
 class VulkanApplication
 {
 protected:
@@ -27,5 +30,7 @@ public:
 
 	virtual void run()=0;
 };
+
+}
 
 #endif

@@ -2,6 +2,8 @@
 #include <QtMath>
 
 
+namespace renderer
+{
 
 
 
@@ -47,7 +49,7 @@ float ArcBallCamera::getPhi() const
 
 void ArcBallCamera::setPhi(float phi)
 {
-    phi_ = std::max(std::min(static_cast<float>(M_PI-0.01), phi), 0.0f);
+    phi_ = std::max(std::min(static_cast<float>(M_PI-0.01), phi), 0.01f);
     computePosition();
 }
 
@@ -90,7 +92,7 @@ void ArcBallCamera::setPosition(const QVector3D &position)
 
 void ArcBallCamera::incrementPhi(float phiStep)
 {
-    setPhi(phi_ + phiStep);
+    setPhi(phi_ - phiStep);
 }
 
 //------------------------------------------------------------------------------------------------------
@@ -128,6 +130,6 @@ void ArcBallCamera::computePolar()
 }
 
 
-
+}
 
 

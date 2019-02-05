@@ -3,7 +3,8 @@
 
 
 
-
+namespace renderer
+{
 
 RendererWindow::RendererWindow()
 {
@@ -98,7 +99,7 @@ void RendererWindow::processWheelEvent(const QWheelEvent *e)
 void RendererWindow::processLeftMouseButtonEvent(const QMouseEvent *e)
 {
     QPointF delta = QPointF(e->pos() - mouseLastPosition_) * ANGLE_INCREMENT_STEP;
-    camera_.incrementTheta(-delta.x());
+    camera_.incrementTheta(delta.x());
     camera_.incrementPhi(delta.y());
     mouseLastPosition_ = e->pos();
 }
@@ -186,3 +187,4 @@ bool RendererWindow::event(QEvent *e)
 }
 
 
+}

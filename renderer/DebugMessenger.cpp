@@ -6,6 +6,9 @@
 #include<QDebug>
 
 
+namespace renderer
+{
+
 VkResult CreateDebugUtilMessengerEXT(VkInstance instance,
 	VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
 	VkAllocationCallbacks* pAllocator,
@@ -174,4 +177,6 @@ bool DebugMessenger::checkValidationLayerSupport()
 		}
 	}
 	return true;
+}
+
 }

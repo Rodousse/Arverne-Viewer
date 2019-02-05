@@ -2,6 +2,8 @@
 #include "VulkanCore.hpp"
 #include <algorithm>
 
+namespace renderer
+{
 
 Swapchain::Swapchain(const VulkanCore *pCore):
 	VkElement(pCore)
@@ -277,3 +279,4 @@ void Swapchain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
 	}
 }
 
+}

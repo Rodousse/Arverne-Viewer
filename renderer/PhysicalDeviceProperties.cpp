@@ -2,7 +2,8 @@
 #include <set>
 #include <string>
 
-
+namespace renderer
+{
 
 void PhysicalDeviceProperties::refreshProperties()
 {
@@ -167,4 +168,6 @@ const VkPhysicalDeviceMemoryProperties & PhysicalDeviceProperties::getVkPhysical
 
 PhysicalDeviceProperties::~PhysicalDeviceProperties()
 {
+}
+
 }

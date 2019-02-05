@@ -4,6 +4,8 @@
 #include <vector>
 #include "VkElement.hpp"
 
+namespace renderer
+{
 
 struct QueueFamilyIndices
 {
@@ -62,5 +64,7 @@ public:
 
     ~PhysicalDeviceProperties();
 };
+
+}
 
 #endif

@@ -2,6 +2,9 @@
 #include "VulkanCore.hpp"
 
 
+namespace renderer
+{
+
 void Texture2D::createImage()
 {
 
@@ -216,4 +219,7 @@ const VkSampler & Texture2D::getSampler() const
 
 Texture2D::~Texture2D()
 {
+}
+
+
 }

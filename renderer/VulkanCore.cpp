@@ -5,7 +5,10 @@
 #include <fstream>
 #include <chrono>
 #include <QFile>
+#include "loader/ObjLoader.hpp"
 
+namespace renderer
+{
 
 VulkanCore::VulkanCore():
 	debugMessenger_(this, &instance_),
@@ -13,21 +16,20 @@ VulkanCore::VulkanCore():
 	utilities_(this),
     lenaTexture_(this, ":/textures/texture.jpg", VK_FORMAT_R8G8B8A8_UNORM)
 {
+
 	if (ENABLE_VALIDATION_LAYERS)
 	{
 		requiredExtensions_.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 	}
+    ObjLoader loader;
+    loader.load("F:/WINDOWS_PAS_TOUCHE/Bureau/Dev/PBR-Viewer/models/RazorBlade.obj", meshes_);
+
 }
 
 //------------------------------------------------------------------------------------------------------
 
 void VulkanCore::drawFrame()
 {
-	/*if (framebufferResize)
-	{
-		recreateSwapChain();
-		framebufferResize = false;
-	}*/
 	uint32_t imageIndex;
 
 	vkWaitForFences(logicalDevice_, 1, &inFlightFences_[currentFrame_], VK_TRUE, std::numeric_limits<uint64_t>::max());
@@ -631,7 +633,7 @@ void VulkanCore::createGraphicsPipeline()
 	rasterizerInfo.polygonMode = VK_POLYGON_MODE_FILL;
 	rasterizerInfo.lineWidth = 1.0f;
 	rasterizerInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-	rasterizerInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
+    rasterizerInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;// VK_FRONT_FACE_COUNTER_CLOCKWISE;
 	rasterizerInfo.depthBiasEnable = VK_FALSE;
 
 	VkPipelineMultisampleStateCreateInfo multiSampInfo = {};
@@ -789,7 +791,7 @@ void VulkanCore::createColorRessources()
 void VulkanCore::createVertexBuffer()
 {
 	std::cout << "Creating and Allocating Vertex Buffer" << std::endl;
-	VkDeviceSize bufferSize = sizeof(VERTICES[0]) * VERTICES.size();
+    VkDeviceSize bufferSize = sizeof(meshes_[0].vertices[0]) * meshes_[0].vertices.size();
 	VkBufferUsageFlags usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 	VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 	VkBuffer stagingBuffer;
@@ -802,7 +804,7 @@ void VulkanCore::createVertexBuffer()
 	//Documentation : memory must have been created with a memory type that reports VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
 	//					flags is reserved for future use of the vulkanAPI.
 	vkMapMemory(logicalDevice_, stagingBufferMemory, 0, bufferSize, 0, &pData);
-	memcpy(pData, VERTICES.data(), (size_t)bufferSize);
+    memcpy(pData, meshes_[0].vertices.data(), (size_t)bufferSize);
 	vkUnmapMemory(logicalDevice_, stagingBufferMemory);
 
 	utilities_.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer_, vertexBufferMemory_);
@@ -819,7 +821,7 @@ void VulkanCore::createVertexIndexBuffer()
 {
 
 	std::cout << "Creating and Allocating Index Buffer" << std::endl;
-	VkDeviceSize bufferSize = sizeof(VERTEX_INDICES[0]) * VERTEX_INDICES.size();
+    VkDeviceSize bufferSize = sizeof(meshes_[0].indices[0]) * meshes_[0].indices.size();
 	VkBufferUsageFlags usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 	VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 	VkBuffer stagingBuffer;
@@ -832,7 +834,7 @@ void VulkanCore::createVertexIndexBuffer()
 	//Documentation : memory must have been created with a memory type that reports VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
 	//					flags is reserved for future use of the vulkanAPI.
 	vkMapMemory(logicalDevice_, stagingBufferMemory, 0, bufferSize, 0, &pData);
-	memcpy(pData, VERTEX_INDICES.data(), (size_t)bufferSize);
+    memcpy(pData, meshes_[0].indices.data(), (size_t)bufferSize);
 	vkUnmapMemory(logicalDevice_, stagingBufferMemory);
 
 	utilities_.createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexIndexBuffer_, vertexIndexBufferMemory_);
@@ -870,14 +872,19 @@ void VulkanCore::updateUniformBuffer(uint32_t imageIndex)
 
     UniformBufferObject ubo = {};
 
-    ubo.model.setToIdentity();//ubo.model;// glm::rotate(glm::mat4(1.0f), time*glm::radians(30.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    //ubo.model.rotate(angle, QVector3D(0.0f, 0.0f, 1.0f));
-    ubo.view.setToIdentity(); //= glm::lookAt(glm::vec3(1.4f, 1.4f, 1.0f), glm::vec3(0.0f, 0.0f, 0.4f), glm::vec3(0.0f, 0.0f, 1.0f));
-    ubo.view.lookAt(camera_.getPosition(), camera_.getCenter(), camera_.getUp());//QVector3D(0.0f, 0.0f, 1.0f));
+    ubo.model.setToIdentity();
+    ubo.view.setToIdentity();
+    ubo.view.lookAt(camera_.getPosition(), camera_.getCenter(), camera_.getUp());
 
 
     ubo.projection.perspective(camera_.getFov(), swapchain_.getExtent().width / (float)swapchain_.getExtent().height, 0.01f, 100.0f);
-    //ubo.projection = glm::perspective(glm::radians(45.0f), window_->swapChainImageSize().width() / (float)window_->swapChainImageSize().height(), 0.1f, 100.0f);
+
+    static auto startTime = std::chrono::high_resolution_clock::now();
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float time = 2*std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+    ubo.lightPos = QVector3D(4*cos(time), 4*sin(time), 3);
 
     void *pData;
     for(uint8_t i = 0; i < swapchain_.getImageViews().size(); i++)
@@ -1031,7 +1038,7 @@ void VulkanCore::createCommandBuffers()
 			vkCmdBindDescriptorSets(commandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout_, 0, 1, &descriptorSets_[i], 0, nullptr);
 			//1 used for the instanced rendering could be higher i think for multiple instanced
 			//vkCmdDraw(commandBuffers_[i], static_cast<uint32_t>(VERTICES.size()), 1, 0, 0);
-			vkCmdDrawIndexed(commandBuffers_[i], static_cast<uint32_t>(VERTEX_INDICES.size()), 1, 0, 0, 0);
+            vkCmdDrawIndexed(commandBuffers_[i], static_cast<uint32_t>(meshes_[0].indices.size()), 1, 0, 0, 0);
 
 		vkCmdEndRenderPass(commandBuffers_[i]);
 
@@ -1229,12 +1236,13 @@ void VulkanCore::cleanup()
 /*
  * @brief : Returns the data well aligned in memory to be used in the corresponding shader stage(s)
  */
-std::array<float, 48> VulkanCore::UniformBufferObject::getConstData()
+std::array<float, 51> VulkanCore::UniformBufferObject::getConstData()
 {
-    std::array<float, 48> data;
+    std::array<float, 51> data;
     memcpy(data.data(), model.constData(), 16 * sizeof (float));
     memcpy(data.data() + 16, view.constData(), 16 * sizeof (float));
     memcpy(data.data() + 32, projection.constData(), 16 * sizeof (float));
+    memcpy(data.data() + 48, &lightPos, 3 * sizeof (float));
 
     return data;
 }
@@ -1243,5 +1251,8 @@ std::array<float, 48> VulkanCore::UniformBufferObject::getConstData()
 
 constexpr uint32_t VulkanCore::UniformBufferObject::size()
 {
-    return 48 * sizeof(float);
+    return 51 * sizeof(float);
+}
+
+
 }

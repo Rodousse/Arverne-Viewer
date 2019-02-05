@@ -12,7 +12,10 @@
 #include "Vertex.hpp"
 #include "Texture2D.hpp"
 #include "camera/Camera.hpp"
+#include "Mesh.hpp"
 
+namespace renderer
+{
 
 #ifndef NDEBUG
 const bool ENABLE_VALIDATION_LAYERS = true;
@@ -35,7 +38,8 @@ protected :
         QMatrix4x4 model;
         QMatrix4x4 view;
         QMatrix4x4 projection;
-        std::array<float, 48> getConstData();
+        QVector3D lightPos;
+        std::array<float, 51> getConstData();
         static constexpr uint32_t size();
 	};
 
@@ -137,7 +141,7 @@ protected :
 
     Texture2D lenaTexture_;
     Camera camera_;
-
+    std::vector<Mesh> meshes_;
 
 
     /***********************************************************************************************************************/
@@ -224,6 +228,8 @@ public:
 
 	~VulkanCore();
 };
+
+}
 
 
 #endif

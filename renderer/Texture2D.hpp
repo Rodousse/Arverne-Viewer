@@ -5,6 +5,9 @@
 #include <string>
 #include <QImage>
 
+namespace renderer
+{
+
 class Texture2D :
 	public VkElement
 {
@@ -39,5 +42,7 @@ public:
 
     ~Texture2D() override;
 };
+
+}
 
 #endif

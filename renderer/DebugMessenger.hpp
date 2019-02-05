@@ -5,7 +5,8 @@
 #include <vector>
 
 
-
+namespace renderer
+{
 
 class DebugMessenger :
 	public VkElement
@@ -40,6 +41,6 @@ public:
     ~DebugMessenger() override;
 };
 
-
+}
 
 #endif //DEBUG_MESSENGER_HPP

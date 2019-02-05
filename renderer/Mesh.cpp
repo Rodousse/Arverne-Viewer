@@ -1,6 +1,11 @@
-#include "mesh.h"
+#include "Mesh.hpp"
+namespace renderer
+{
 
 Mesh::Mesh()
 {
+
+}
+
 
 }

@@ -4,6 +4,8 @@
 
 #include "Camera.hpp"
 
+namespace renderer
+{
 
 class ArcBallCamera : public Camera
 {
@@ -34,4 +36,5 @@ public:
     void setTheta(float theta);
 };
 
+}
 #endif // ARCBALLCAMERA_HPP

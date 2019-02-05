@@ -1,6 +1,7 @@
 #include "VulkanApplication.hpp"
 
-
+namespace renderer
+{
 
 VulkanApplication::VulkanApplication()
 {
@@ -19,4 +20,6 @@ void VulkanApplication::setName(const std::string & name)
 const std::string & VulkanApplication::getName()const
 {
 	return name_;
+}
+
 }

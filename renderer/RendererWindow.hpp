@@ -10,6 +10,8 @@
 #define WIDTH_WINDOW 800
 #define HEIGHT_WINDOW 600
 
+namespace renderer
+{
 
 class RendererWindow: public QWindow, public VulkanApplication
 {
@@ -18,7 +20,7 @@ private:
 	bool windowResized_ = false;
     bool initialized_ = false;
 
-    const float ANGLE_INCREMENT_STEP = 0.03f;
+    const float ANGLE_INCREMENT_STEP = 0.01f;
     const float RADIUS_INCREMENT_STEP = 0.5f;
     Qt::MouseButton mouseButtonPressed_ = Qt::NoButton;
     QPoint mouseLastPosition_;
@@ -62,5 +64,7 @@ public:
     void setAngle(uint16_t angle);
 
 };
+
+}
 
 #endif

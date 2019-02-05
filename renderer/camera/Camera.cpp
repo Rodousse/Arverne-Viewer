@@ -1,7 +1,8 @@
 #include "Camera.hpp"
 
 
-
+namespace renderer
+{
 
 const QVector3D& Camera::getPosition() const
 {
@@ -34,7 +35,7 @@ void Camera::setCenter(const QVector3D &center)
 Camera::Camera():
     position_(-1.0f,0.0f,0.0f),
     center_(0.0f, 0.0f, 0.0f),
-    up_(0.0f,0.0f,1.0f),
+    up_(0.0f,0.0f,-1.0f),
     fov_(45.0f)
 {
 
@@ -73,4 +74,6 @@ float Camera::getFov() const
 void Camera::setFov(float fov)
 {
     fov_ = fov;
+}
+
 }

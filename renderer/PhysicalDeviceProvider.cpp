@@ -1,7 +1,8 @@
 #include "PhysicalDeviceProvider.hpp"
 #include "VulkanCore.hpp"
 
-
+namespace renderer
+{
 
 bool PhysicalDeviceProvider::isDeviceSuitable(VkPhysicalDevice device)const
 {
@@ -115,4 +116,7 @@ void PhysicalDeviceProvider::setRequiredDeviceFeatures(VkPhysicalDeviceFeatures 
 
 PhysicalDeviceProvider::~PhysicalDeviceProvider()
 {
+}
+
+
 }

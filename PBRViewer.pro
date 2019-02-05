@@ -39,7 +39,10 @@ SOURCES += \
     renderer/VulkanUtils.cpp \
     renderer/RendererWindow.cpp \
     renderer/camera/Camera.cpp \
-    renderer/camera/ArcBallCamera.cpp
+    renderer/camera/ArcBallCamera.cpp \
+    loader/Loader.cpp \
+    loader/ObjLoader.cpp \
+    renderer/Mesh.cpp
 
 
 HEADERS += \
@@ -56,7 +59,11 @@ HEADERS += \
     renderer/Vertex.hpp \
     renderer/RendererWindow.hpp \
     renderer/camera/Camera.hpp \
-    renderer/camera/ArcBallCamera.hpp
+    renderer/camera/ArcBallCamera.hpp \
+    loader/Loader.hpp \
+    loader/ObjLoader.hpp \
+    renderer/Mesh.hpp \
+    third_party/tinyobjloader/tiny_obj_loader.h
 
 
 # Default rules for deployment.

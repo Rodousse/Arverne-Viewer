@@ -3,6 +3,9 @@
 
 #include <QVector3D>
 
+namespace renderer
+{
+
 class Camera
 {
 protected:
@@ -28,5 +31,7 @@ public:
     const QVector3D& getCenter() const;
     virtual void setCenter(const QVector3D &center);
 };
+
+}
 
 #endif // CAMERA_HPP

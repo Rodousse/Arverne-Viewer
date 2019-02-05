@@ -3,6 +3,9 @@
 
 #include <vulkan/vulkan.h>
 
+namespace renderer
+{
+
 class VulkanCore;
 
 
@@ -21,6 +24,6 @@ public:
 	virtual ~VkElement();
 };
 
-
+}
 
 #endif

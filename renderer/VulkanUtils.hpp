@@ -3,6 +3,9 @@
 
 #include "VkElement.hpp"
 
+namespace renderer
+{
+
 class VulkanUtils 
 {
 private:
@@ -23,6 +26,8 @@ public:
     bool hasStencilComponent(VkFormat format) const;
     VkSampleCountFlagBits getMaxUsableSampleCount();
 };
+
+}
 
 
 #endif

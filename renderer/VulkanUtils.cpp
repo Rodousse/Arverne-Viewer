@@ -1,7 +1,8 @@
 #include "VulkanUtils.hpp"
 #include "VulkanCore.hpp"
 
-
+namespace renderer
+{
 
 VulkanUtils::VulkanUtils(const VulkanCore * pCore):
 	pCore_(pCore)
@@ -366,3 +367,5 @@ bool VulkanUtils::hasStencilComponent(VkFormat format)const
         || format == VK_FORMAT_D32_SFLOAT_S8_UINT;
 }
 
+
+}

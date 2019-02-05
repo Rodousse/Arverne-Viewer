@@ -5,6 +5,9 @@
 #include <iostream>
 #include <vector>
 
+namespace renderer
+{
+
 
 class Swapchain :
 	public VkElement
@@ -50,5 +53,8 @@ public:
 
 
 };
+
+
+}
 
 #endif

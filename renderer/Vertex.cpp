@@ -1,6 +1,9 @@
 #include "Vertex.hpp"
 
 
+namespace renderer
+{
+
 VkVertexInputBindingDescription Vertex::getBindingDescription()
 {
 	VkVertexInputBindingDescription bindingDescription = {};
@@ -23,7 +26,7 @@ std::array<VkVertexInputAttributeDescription, 3> Vertex::getAttributeDescription
 	attribDescriptions[1].binding = 0;
 	attribDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
 	attribDescriptions[1].location = 1;
-	attribDescriptions[1].offset = offsetof(Vertex, color);
+    attribDescriptions[1].offset = offsetof(Vertex, normal);
 
 	attribDescriptions[2].binding = 0;
 	attribDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
@@ -32,5 +35,12 @@ std::array<VkVertexInputAttributeDescription, 3> Vertex::getAttributeDescription
 
 	return attribDescriptions;
 
+
+}
+
+bool Vertex::operator==(const Vertex &other) const
+{
+    return pos == other.pos && normal == other.normal && texCoord == other.texCoord;
+}
 
 }

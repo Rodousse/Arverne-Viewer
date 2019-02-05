@@ -6,6 +6,9 @@
 #include "VkElement.hpp"
 #include "PhysicalDeviceProperties.hpp"
 
+namespace renderer {
+
+
 class PhysicalDeviceProvider
 {
 private:
@@ -27,6 +30,6 @@ public:
 	~PhysicalDeviceProvider();
 };
 
-
+}
 
 #endif

@@ -7,15 +7,21 @@
 #include <array>
 
 
+namespace renderer
+{
+
 struct Vertex
 {
     QVector3D pos;
-    QVector3D color;
+    //QVector3D color;
+    QVector3D normal;
     QVector2D texCoord;
 
 	static VkVertexInputBindingDescription getBindingDescription();
-	static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
+    static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();
+    bool operator==(const Vertex& other) const;
 };
 
+}
 
 #endif

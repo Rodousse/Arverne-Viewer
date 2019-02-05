@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     const bool dbg = qEnvironmentVariableIntValue("QT_VK_DEBUG");
 
     QVulkanInstance instance;
-    RendererWindow *vulkanWindow = new RendererWindow();
+    renderer::RendererWindow *vulkanWindow = new renderer::RendererWindow();
 
     if (dbg) {
         QLoggingCategory::setFilterRules(QStringLiteral("qt.vulkan=true"));
