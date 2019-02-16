@@ -35,7 +35,7 @@ void main()
     gl_Position = ubo.projection * ubo.view * ubo.model * vec4(inPosition, 1.0);
 
     vec4 worldPos = ubo.model * vec4(inPosition, 1.0);
-    mat3 normalMatrix = transpose(inverse(mat3(ubo.model)));
+    mat3 normalMatrix = transpose(inverse(mat3(ubo.model))); //Prevent Normal deformation from non uniform model matrice
 
 
     lightDir = ubo.lightPos - worldPos.xyz;

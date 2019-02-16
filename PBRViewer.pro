@@ -26,44 +26,52 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        ui/mainwindow.cpp \
     renderer/DebugMessenger.cpp \
     renderer/PhysicalDeviceProperties.cpp \
     renderer/PhysicalDeviceProvider.cpp \
     renderer/Swapchain.cpp \
-    renderer/Texture2D.cpp \
+    renderer/texture/Texture2D.cpp \
     renderer/Vertex.cpp \
     renderer/VkElement.cpp \
     renderer/VulkanApplication.cpp \
     renderer/VulkanCore.cpp \
     renderer/VulkanUtils.cpp \
-    renderer/RendererWindow.cpp \
     renderer/camera/Camera.cpp \
     renderer/camera/ArcBallCamera.cpp \
     loader/Loader.cpp \
     loader/ObjLoader.cpp \
-    renderer/Mesh.cpp
+    renderer/Mesh.cpp \
+    renderer/CubeMap.cpp \
+    renderer/texture/MaterialTexture.cpp \
+    loader/ImageLoader.cpp \
+    application/QtImageLoader.cpp \
+    application/mainwindow.cpp \
+    application/RendererWindow.cpp
 
 
 HEADERS += \
-        ui/mainwindow.h \
     renderer/DebugMessenger.hpp \
     renderer/PhysicalDeviceProperties.hpp \
     renderer/PhysicalDeviceProvider.hpp \
     renderer/Swapchain.hpp \
-    renderer/Texture2D.hpp \
+    renderer/texture/Texture2D.hpp \
     renderer/VkElement.hpp \
     renderer/VulkanApplication.hpp \
     renderer/VulkanCore.hpp \
     renderer/VulkanUtils.hpp \
     renderer/Vertex.hpp \
-    renderer/RendererWindow.hpp \
     renderer/camera/Camera.hpp \
     renderer/camera/ArcBallCamera.hpp \
     loader/Loader.hpp \
     loader/ObjLoader.hpp \
     renderer/Mesh.hpp \
-    third_party/tinyobjloader/tiny_obj_loader.h
+    third_party/tinyobjloader/tiny_obj_loader.h \
+    renderer/CubeMap.hpp \
+    renderer/texture/MaterialTexture.hpp \
+    loader/ImageLoader.hpp \
+    application/mainwindow.h \
+    application/QtImageLoader.hpp \
+    application/RendererWindow.hpp
 
 
 # Default rules for deployment.

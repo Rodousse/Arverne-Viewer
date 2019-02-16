@@ -3,8 +3,6 @@
 
 
 
-namespace renderer
-{
 
 RendererWindow::RendererWindow()
 {
@@ -187,4 +185,4 @@ bool RendererWindow::event(QEvent *e)
 }
 
 
-}
+

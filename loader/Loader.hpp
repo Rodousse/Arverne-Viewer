@@ -1,9 +1,23 @@
+/*
+ *
+ *
+ *  Abstract class loading a 3D model File , all the meshes are stored in a vector
+ * of Mesh instance Vulan formated
+ *
+ *
+ *
+ */
+
+
+
 #ifndef _LOADER_HPP_
 #define _LOADER_HPP_
 
 #include <iostream>
 #include <string>
 #include <renderer/Mesh.hpp>
+
+
 
 class Loader
 {

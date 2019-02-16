@@ -14,7 +14,7 @@ VulkanCore::VulkanCore():
 	debugMessenger_(this, &instance_),
 	swapchain_(this),
 	utilities_(this),
-    lenaTexture_(this, ":/textures/texture.jpg", VK_FORMAT_R8G8B8A8_UNORM)
+    lenaTexture_(this, ":/textures/default.bmp", VK_FORMAT_R8G8B8A8_UNORM)
 {
 
 	if (ENABLE_VALIDATION_LAYERS)
@@ -253,9 +253,9 @@ void VulkanCore::createInstance()
 	//Applications infos about the version, the engine version, the vulkan version used
 	VkApplicationInfo appInfo = {};
 	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	appInfo.pApplicationName = "Vulkan Triangle";
+    appInfo.pApplicationName = "PBR Viewer";
 	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.pEngineName = "No Engine";
+    appInfo.pEngineName = "SuperViewerArverne";
 	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
 	appInfo.apiVersion = VK_API_VERSION_1_0;
 

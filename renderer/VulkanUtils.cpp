@@ -16,7 +16,7 @@ VulkanUtils::~VulkanUtils()
 
 //------------------------------------------------------------------------------------------------------
 
-VkImageView VulkanUtils::createImageView(VkFormat format, VkImage image, VkImageAspectFlags aspectFlags, uint32_t mipLevels)const
+VkImageView VulkanUtils::createImageView(VkFormat format, VkImage image, VkImageAspectFlags aspectFlags, uint32_t mipLevels, VkImageViewCreateFlags flags)const
 {
 	VkImageView imageView;
 
@@ -30,6 +30,7 @@ VkImageView VulkanUtils::createImageView(VkFormat format, VkImage image, VkImage
 	imageViewInfo.subresourceRange.baseArrayLayer = 0;
 	imageViewInfo.subresourceRange.layerCount = 1;
     imageViewInfo.subresourceRange.aspectMask = aspectFlags;
+    imageViewInfo.flags = flags;
 
 	if (vkCreateImageView(pCore_->getDevice(), &imageViewInfo, nullptr, &imageView) != VK_SUCCESS)
 	{
@@ -178,7 +179,7 @@ uint32_t VulkanUtils::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags 
 
 //------------------------------------------------------------------------------------------------------
 
-void VulkanUtils::createImage(uint32_t width, uint32_t height,uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags property, VkImage &image, VkDeviceMemory &imageMemory)const
+void VulkanUtils::createImage(uint32_t width, uint32_t height,uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags property, VkImage &image, VkDeviceMemory &imageMemory, VkImageCreateFlags flags)const
 {
 	VkImageCreateInfo imageInfo = {};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -194,6 +195,7 @@ void VulkanUtils::createImage(uint32_t width, uint32_t height,uint32_t mipLevels
 	imageInfo.usage = usage;
     imageInfo.samples = numSamples;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    imageInfo.flags = flags;
 
 	if (vkCreateImage(pCore_->getDevice(), &imageInfo, nullptr, &image) != VK_SUCCESS)
 	{

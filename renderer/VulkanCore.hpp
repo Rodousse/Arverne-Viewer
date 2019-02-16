@@ -10,7 +10,7 @@
 #include "Swapchain.hpp"
 #include "VulkanUtils.hpp"
 #include "Vertex.hpp"
-#include "Texture2D.hpp"
+#include "texture/MaterialTexture.hpp"
 #include "camera/Camera.hpp"
 #include "Mesh.hpp"
 
@@ -139,7 +139,7 @@ protected :
 
     /******************************************* APPLICATION VARIABLE ******************************************************/
 
-    Texture2D lenaTexture_;
+    MaterialTexture lenaTexture_;
     Camera camera_;
     std::vector<Mesh> meshes_;
 

@@ -2,7 +2,7 @@
 #define RENDERER_WINDOW_HPP
 
 
-#include "VulkanApplication.hpp"
+#include "renderer/VulkanApplication.hpp"
 #include <QVulkanWindowRenderer>
 #include <QResizeEvent>
 #include "renderer/camera/ArcBallCamera.hpp"
@@ -10,10 +10,8 @@
 #define WIDTH_WINDOW 800
 #define HEIGHT_WINDOW 600
 
-namespace renderer
-{
 
-class RendererWindow: public QWindow, public VulkanApplication
+class RendererWindow: public QWindow, public renderer::VulkanApplication
 {
 private:
     QVulkanWindow* window_;
@@ -24,7 +22,7 @@ private:
     const float RADIUS_INCREMENT_STEP = 0.5f;
     Qt::MouseButton mouseButtonPressed_ = Qt::NoButton;
     QPoint mouseLastPosition_;
-    ArcBallCamera camera_;
+    renderer::ArcBallCamera camera_;
 
 
     // --------------------------- VULKANAPPLICATION VIRTUAL
@@ -65,6 +63,5 @@ public:
 
 };
 
-}
 
 #endif

@@ -1,5 +1,5 @@
-#include "ui/mainwindow.h"
-#include "renderer/RendererWindow.hpp"
+#include "application/mainwindow.h"
+#include "application/RendererWindow.hpp"
 #include <QApplication>
 #include <QLoggingCategory>
 #include <QVulkanInstance>
@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     const bool dbg = qEnvironmentVariableIntValue("QT_VK_DEBUG");
 
     QVulkanInstance instance;
-    renderer::RendererWindow *vulkanWindow = new renderer::RendererWindow();
+    RendererWindow *vulkanWindow = new RendererWindow();
 
     if (dbg) {
         QLoggingCategory::setFilterRules(QStringLiteral("qt.vulkan=true"));
@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     vulkanWindow->setVulkanInstance(&instance);
 
     MainWindow mainWindow(vulkanWindow);
-    mainWindow.resize(640,480);
+    mainWindow.resize(1280,720);
     mainWindow.show();
 
     return a.exec();
