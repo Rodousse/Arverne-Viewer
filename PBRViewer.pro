@@ -41,7 +41,6 @@ SOURCES += \
     loader/Loader.cpp \
     loader/ObjLoader.cpp \
     renderer/Mesh.cpp \
-    renderer/CubeMap.cpp \
     renderer/texture/MaterialTexture.cpp \
     loader/ImageLoader.cpp \
     application/QtImageLoader.cpp \
@@ -69,7 +68,6 @@ HEADERS += \
     loader/ObjLoader.hpp \
     renderer/Mesh.hpp \
     third_party/tinyobjloader/tiny_obj_loader.h \
-    renderer/CubeMap.hpp \
     renderer/texture/MaterialTexture.hpp \
     loader/ImageLoader.hpp \
     application/mainwindow.h \
