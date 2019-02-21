@@ -25,7 +25,7 @@ tinyobj::index_t findMaxIndexes(const tinyobj::shape_t& shape);
 
 
 //TODO : Insert Materials
-bool ObjLoader::load(const std::string& path,std::vector<renderer::Mesh>& scene)
+bool ObjLoader::load(const std::string& path,renderer::Model& scene)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -34,7 +34,8 @@ bool ObjLoader::load(const std::string& path,std::vector<renderer::Mesh>& scene)
     std::string err;
     std::string warn;
     bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, path.c_str());
-    
+
+    std::vector<renderer::Mesh> meshes;
 
     if (!err.empty()) {
         qFatal("%s", err.data());
@@ -47,12 +48,12 @@ bool ObjLoader::load(const std::string& path,std::vector<renderer::Mesh>& scene)
 
     renderer::Mesh newMsh;
 
-    uint16_t indexVertex = 0;
     // Loop over shapes
     for (tinyobj::shape_t shape : shapes)
     {
-         size_t index_offset = 0;
+        size_t index_offset = 0;
 
+        uint32_t indexVertex = 0;
 
         newMsh.name = shape.name;
 
@@ -103,10 +104,13 @@ bool ObjLoader::load(const std::string& path,std::vector<renderer::Mesh>& scene)
 
         //----------------------------------------------END TEST
 
+        meshes.push_back(newMsh);
 
     }
 
-    scene.push_back(newMsh);
+
+    scene.assignMesh(meshes);
+
     return true;
 }
 

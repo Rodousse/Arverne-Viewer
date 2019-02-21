@@ -14,15 +14,14 @@ VulkanCore::VulkanCore():
 	debugMessenger_(this, &instance_),
 	swapchain_(this),
 	utilities_(this),
-    lenaTexture_(this, ":/textures/default.bmp", VK_FORMAT_R8G8B8A8_UNORM)
+    lenaTexture_(this, ":/textures/default.bmp", VK_FORMAT_R8G8B8A8_UNORM),
+  model_(this)
 {
 
 	if (ENABLE_VALIDATION_LAYERS)
 	{
 		requiredExtensions_.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-	}
-    ObjLoader loader;
-    loader.load("F:/WINDOWS_PAS_TOUCHE/Bureau/Dev/PBR-Viewer/models/RazorBlade.obj", meshes_);
+    }
 
 }
 
@@ -30,6 +29,8 @@ VulkanCore::VulkanCore():
 
 void VulkanCore::drawFrame()
 {
+    checkApplicationState();
+
 	uint32_t imageIndex;
 
 	vkWaitForFences(logicalDevice_, 1, &inFlightFences_[currentFrame_], VK_TRUE, std::numeric_limits<uint64_t>::max());
@@ -122,8 +123,8 @@ void VulkanCore::initVulkan()
     createColorRessources();
     swapchain_.createFramebuffers(renderPass_, {colorImageView_, depthImageView_});
 	lenaTexture_.create();
-	createVertexBuffer();
-	createVertexIndexBuffer();
+//	createVertexBuffer();
+//	createVertexIndexBuffer();
 	createUniformBuffer();
 	createDescriptorPool();
 	createDescriptorSets();
@@ -306,6 +307,16 @@ void VulkanCore::resizeExtent(int width, int height)
 void VulkanCore::setCamera(const Camera &camera)
 {
     camera_ = camera;
+}
+
+//------------------------------------------------------------------------------------------------------
+
+void VulkanCore::setModel(const Model &model)
+{
+    applicationChanges_.modelModified = true;
+    model_.destroy();
+    model_ = model;
+    model_.create();
 }
 
 //------------------------------------------------------------------------------------------------------
@@ -786,6 +797,14 @@ void VulkanCore::createColorRessources()
 
 }
 
+void VulkanCore::recreateCommandBuffer()
+{
+    vkDeviceWaitIdle(logicalDevice_);
+    vkFreeCommandBuffers(logicalDevice_, commandPool_, (uint32_t)commandBuffers_.size(), commandBuffers_.data());
+    createCommandBuffers();
+
+}
+
 //------------------------------------------------------------------------------------------------------
 
 void VulkanCore::createVertexBuffer()
@@ -1015,7 +1034,7 @@ void VulkanCore::createCommandBuffers()
 		}
 
         std::array<VkClearValue, 2> clearValues = {};
-        clearValues[0].color = { 0.0, 0.0, 0.0, 1.0 };
+        clearValues[0].color = { 1.0f, (153.0f/255.0f), (51.0f/255.0f), 1.0f };
         clearValues[1].depthStencil = { 1.0,0 };
 
 		VkRenderPassBeginInfo renderBeginInfo = {};
@@ -1029,16 +1048,22 @@ void VulkanCore::createCommandBuffers()
 
 		vkCmdBeginRenderPass(commandBuffers_[i], &renderBeginInfo, VK_SUBPASS_CONTENTS_INLINE); // Last parameter used to embedd the command for a primary command buffer or secondary
 
-			//vkCmdSetViewport(commandBuffers_[i], 0, 1, &viewport_);
-			vkCmdBindPipeline(commandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline_);
-			VkBuffer vertexBuffers[] = { vertexBuffer_ };
-			VkDeviceSize offsets[] = { 0 };
-			vkCmdBindVertexBuffers(commandBuffers_[i], 0, 1, vertexBuffers, offsets);
-			vkCmdBindIndexBuffer(commandBuffers_[i], vertexIndexBuffer_, 0, VK_INDEX_TYPE_UINT16);
-			vkCmdBindDescriptorSets(commandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout_, 0, 1, &descriptorSets_[i], 0, nullptr);
-			//1 used for the instanced rendering could be higher i think for multiple instanced
-			//vkCmdDraw(commandBuffers_[i], static_cast<uint32_t>(VERTICES.size()), 1, 0, 0);
-            vkCmdDrawIndexed(commandBuffers_[i], static_cast<uint32_t>(meshes_[0].indices.size()), 1, 0, 0, 0);
+            for(uint32_t idxMesh = 0;  idxMesh < model_.getMeshes().size(); idxMesh++)
+            {
+                const MeshData &meshData = model_.getMeshData()[idxMesh];
+                const Mesh &mesh = model_.getMeshes()[idxMesh];
+                vkCmdBindPipeline(commandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline_);
+//                VkBuffer vertexBuffers[] = { vertexBuffer_ };
+                VkBuffer vertexBuffers[] = { meshData.vertexBuffer };
+                VkDeviceSize offsets[] = { 0 };
+                vkCmdBindVertexBuffers(commandBuffers_[i], 0, 1, vertexBuffers, offsets);
+                //vkCmdBindIndexBuffer(commandBuffers_[i], vertexIndexBuffer_, 0, VK_INDEX_TYPE_UINT16);
+                vkCmdBindIndexBuffer(commandBuffers_[i], meshData.vertexIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
+                vkCmdBindDescriptorSets(commandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout_, 0, 1, &descriptorSets_[i], 0, nullptr);
+                //1 used for the instanced rendering could be higher i think for multiple instanced
+                //vkCmdDrawIndexed(commandBuffers_[i], static_cast<uint32_t>(meshes_[0].indices.size()), 1, 0, 0, 0);
+                vkCmdDrawIndexed(commandBuffers_[i], static_cast<uint32_t>(mesh.indices.size()), 1, 0, 0, 0);
+            }
 
 		vkCmdEndRenderPass(commandBuffers_[i]);
 
@@ -1078,7 +1103,25 @@ void VulkanCore::createSyncObjects()
 	}
 
 
-	std::cout << "Synchronization Objects Created" << std::endl;
+    std::cout << "Synchronization Objects Created" << std::endl;
+}
+
+//------------------------------------------------------------------------------------------------------
+
+void VulkanCore::checkApplicationState()
+{
+    for(size_t idx = 0; idx < sizeof (ApplicationStateChange); idx += sizeof(bool))
+    {
+        bool* state = (reinterpret_cast<bool*>(&applicationChanges_) + idx);
+        if(state == &applicationChanges_.modelModified && *state){
+            recreateCommandBuffer();
+            *state = false;
+            return;
+        }
+        else if(state == &applicationChanges_.modelModified && state){
+            return;
+        }
+    }
 }
 
 //------------------------------------------------------------------------------------------------------
@@ -1200,10 +1243,12 @@ void VulkanCore::cleanup()
             vkDestroyBuffer(logicalDevice_, uniformBuffers_[i], nullptr);
             vkFreeMemory(logicalDevice_, uniformBuffersMemory_[i], nullptr);
         }
-        vkDestroyBuffer(logicalDevice_, vertexBuffer_, nullptr);
-        vkFreeMemory(logicalDevice_, vertexBufferMemory_, nullptr);
-        vkDestroyBuffer(logicalDevice_, vertexIndexBuffer_, nullptr);
-        vkFreeMemory(logicalDevice_, vertexIndexBufferMemory_, nullptr);
+
+        model_.destroy();
+//        vkDestroyBuffer(logicalDevice_, vertexBuffer_, nullptr);
+//        vkFreeMemory(logicalDevice_, vertexBufferMemory_, nullptr);
+//        vkDestroyBuffer(logicalDevice_, vertexIndexBuffer_, nullptr);
+//        vkFreeMemory(logicalDevice_, vertexIndexBufferMemory_, nullptr);
 
         //Semaphores
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)

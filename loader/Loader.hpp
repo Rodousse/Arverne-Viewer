@@ -15,7 +15,7 @@
 
 #include <iostream>
 #include <string>
-#include <renderer/Mesh.hpp>
+#include <renderer/Model.hpp>
 
 
 
@@ -27,7 +27,7 @@ private:
 public:
     Loader();
     virtual ~Loader();
-    virtual bool load(const std::string& path, std::vector<renderer::Mesh>& scene)=0;
+    virtual bool load(const std::string& path, renderer::Model& scene)=0;
 };
 
 

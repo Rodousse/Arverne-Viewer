@@ -46,7 +46,10 @@ SOURCES += \
     loader/ImageLoader.cpp \
     application/QtImageLoader.cpp \
     application/mainwindow.cpp \
-    application/RendererWindow.cpp
+    application/RendererWindow.cpp \
+    renderer/Model.cpp \
+    renderer/Material.cpp \
+    application/ModelManager.cpp
 
 
 HEADERS += \
@@ -71,7 +74,10 @@ HEADERS += \
     loader/ImageLoader.hpp \
     application/mainwindow.h \
     application/QtImageLoader.hpp \
-    application/RendererWindow.hpp
+    application/RendererWindow.hpp \
+    renderer/Model.hpp \
+    renderer/Material.hpp \
+    application/ModelManager.hpp
 
 
 # Default rules for deployment.

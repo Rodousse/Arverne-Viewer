@@ -4,7 +4,8 @@
 
 
 
-RendererWindow::RendererWindow()
+RendererWindow::RendererWindow():
+    modelManager_(&vkCore_)
 {
     setSurfaceType(VulkanSurface);
     vkCore_.setCamera(camera_);
@@ -52,6 +53,7 @@ void RendererWindow::initInstance(QVulkanInstance *instance)
     initCore();
     instance->setVkInstance(vkCore_.getInstance());
 }
+
 
 void RendererWindow::createSurface()
 {
@@ -168,6 +170,13 @@ bool RendererWindow::event(QEvent *e)
             mouseButtonPressed_ = Qt::NoButton;
         }
         break;
+    case QEvent::KeyRelease:
+        if(static_cast<QKeyEvent*>(e)->key() == Qt::Key_Escape)
+            if(this->visibility()==QWindow::FullScreen)
+            {
+                this->showNormal();
+            }
+            break;
     }
 
     if(e->type() == QEvent::Wheel)
@@ -184,5 +193,26 @@ bool RendererWindow::event(QEvent *e)
     return QWindow::event(e);
 }
 
+void RendererWindow::loadNewMesh(const std::string &path)
+{
+    modelManager_.loadNewMesh(path);
+}
+
+ModelManager &RendererWindow::getModelManager()
+{
+    return modelManager_;
+}
+
+const ModelManager &RendererWindow::getModelManager() const
+{
+    return modelManager_;
+}
+
+
+
+void RendererWindow::setFullscreen()
+{
+    this->showFullScreen();
+}
 
 

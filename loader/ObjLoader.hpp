@@ -13,7 +13,7 @@ public:
     ObjLoader();
     virtual ~ObjLoader() override;
 
-    bool load(const std::string& path, std::vector<renderer::Mesh> &scene) override;
+    bool load(const std::string& path, renderer::Model &scene) override;
 };
 
 

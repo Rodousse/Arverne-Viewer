@@ -13,6 +13,7 @@
 #include "texture/MaterialTexture.hpp"
 #include "camera/Camera.hpp"
 #include "Mesh.hpp"
+#include "Model.hpp"
 
 namespace renderer
 {
@@ -32,6 +33,11 @@ protected :
 
 
      /******************************************* CORE VARIABLE ******************************************************/
+
+    struct ApplicationStateChange{
+        bool materialModified = false;
+        bool modelModified = false;
+    };
 
 	struct UniformBufferObject
 	{
@@ -142,7 +148,8 @@ protected :
     MaterialTexture lenaTexture_;
     Camera camera_;
     std::vector<Mesh> meshes_;
-
+    Model model_;
+    ApplicationStateChange applicationChanges_;
 
     /***********************************************************************************************************************/
 
@@ -152,7 +159,7 @@ protected :
 	void pickPhysicalDevice();
 	void createLogicalDevice();
 
-	//Swapchains
+    //Swapchains, graphics pipeline
 
 	void createSwapChain();
 	void recreateSwapChain();
@@ -163,6 +170,8 @@ protected :
 	void createCommandBuffers();
     void createDepthRessources();
     void createColorRessources();
+
+    void recreateCommandBuffer();
 
 	//Shader Loading and Creation
 
@@ -184,9 +193,10 @@ protected :
 	void createDescriptorPool();
 	void createDescriptorSets();
 
-	// Rendering !
-
+    // Synchronisation
 	void createSyncObjects();
+    void checkApplicationState();
+
 
 	void cleanup();
 
@@ -220,6 +230,7 @@ public:
     void resizeExtent(int width, int height);
 
     void setCamera(const Camera& camera);
+    void setModel(const Model& model);
 
 
 	void drawFrame();
