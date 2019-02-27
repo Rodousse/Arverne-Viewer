@@ -14,7 +14,7 @@ RendererWindow::RendererWindow():
 
 RendererWindow::~RendererWindow()
 {
-    setName("PBR Viewer");
+    setName("Arverne Viewer");
 }
 
 void RendererWindow::initCore()
