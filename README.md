@@ -47,6 +47,5 @@ git submodule update
 This project uses different dependencies :
 
 - [TinyObjLoader](https://github.com/syoyo/tinyobjloader.git) : Used to load obj files to render (Credit to [syoyo](https://github.com/syoyo))
-- [Eigen](https://github.com/eigenteam/eigen-git-mirror) : Matrice and vector manipulation
 
 ---
