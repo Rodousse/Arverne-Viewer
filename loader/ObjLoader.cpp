@@ -1,11 +1,10 @@
 #include "ObjLoader.hpp"
 #include <algorithm>
-#include <QVector2D>
-#include <QVector3D>
-#include <QMap>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "third_party/tinyobjloader/tiny_obj_loader.h"
+#include "tiny_obj_loader.h"
 
 ObjLoader::ObjLoader(/* args */) : 
 Loader()
@@ -38,7 +37,7 @@ bool ObjLoader::load(const std::string& path,renderer::Model& scene)
     std::vector<renderer::Mesh> meshes;
 
     if (!err.empty()) {
-        qFatal("%s", err.data());
+        std::cout << err.data() << std::endl;
     }
 
     if (!ret) {
@@ -72,17 +71,17 @@ bool ObjLoader::load(const std::string& path,renderer::Model& scene)
                 if(idx.vertex_index > -1)
                 {
                     indexTemp = idx.vertex_index*3;
-                    vertex.pos = QVector3D(attrib.vertices[indexTemp], attrib.vertices[indexTemp+1], attrib.vertices[indexTemp+2]);
+                    vertex.pos = glm::vec3(attrib.vertices[indexTemp], attrib.vertices[indexTemp+1], attrib.vertices[indexTemp+2]);
                 }
                 if(idx.normal_index > -1)
                 {
                     indexTemp = idx.normal_index*3;
-                    vertex.normal = QVector3D(attrib.normals[indexTemp], attrib.normals[indexTemp+1], attrib.normals[indexTemp+2]);
+                    vertex.normal = glm::vec3(attrib.normals[indexTemp], attrib.normals[indexTemp+1], attrib.normals[indexTemp+2]);
                 }
                 if(idx.texcoord_index > -1)
                 {
                     indexTemp = idx.texcoord_index*2;
-                    vertex.texCoord = QVector2D(attrib.texcoords[indexTemp], attrib.texcoords[indexTemp+1]);
+                    vertex.texCoord = glm::vec2(attrib.texcoords[indexTemp], attrib.texcoords[indexTemp+1]);
                 }
 
 
