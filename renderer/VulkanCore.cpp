@@ -6,6 +6,7 @@
 #include <chrono>
 #include <QFile>
 #include "loader/ObjLoader.hpp"
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace renderer
 {
@@ -891,25 +892,26 @@ void VulkanCore::updateUniformBuffer(uint32_t imageIndex)
 
     UniformBufferObject ubo = {};
 
-    ubo.model.setToIdentity();
-    ubo.view.setToIdentity();
-    ubo.view.lookAt(camera_.getPosition(), camera_.getCenter(), camera_.getUp());
+    ubo.model = glm::mat4x4(1.0f);
+    ubo.view = glm::mat4x4(1.0f);
+
+    ubo.view = glm::lookAt(camera_.getPosition(), camera_.getCenter(), camera_.getUp());
 
 
-    ubo.projection.perspective(camera_.getFov(), swapchain_.getExtent().width / (float)swapchain_.getExtent().height, 0.01f, 100.0f);
+    ubo.projection = glm::perspective(camera_.getFov(), swapchain_.getExtent().width / (float)swapchain_.getExtent().height, 0.01f, 100.0f);
 
     static auto startTime = std::chrono::high_resolution_clock::now();
 
     auto currentTime = std::chrono::high_resolution_clock::now();
     float time = 2*std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 
-    ubo.lightPos = QVector3D(4*cos(time), 4*sin(time), 3);
+    ubo.lightPos = glm::vec3(4*cos(time), 4*sin(time), 3);
 
     void *pData;
     for(uint8_t i = 0; i < swapchain_.getImageViews().size(); i++)
     {
-        vkMapMemory(logicalDevice_, uniformBuffersMemory_[i], 0, UniformBufferObject::size(), 0, &pData);
-        memcpy(pData, ubo.getConstData().data(), UniformBufferObject::size());
+        vkMapMemory(logicalDevice_, uniformBuffersMemory_[i], 0, sizeof (UniformBufferObject), 0, &pData);
+        memcpy(pData, &ubo, sizeof(UniformBufferObject));
         vkUnmapMemory(logicalDevice_, uniformBuffersMemory_[i]);
     }
 }
@@ -1053,15 +1055,15 @@ void VulkanCore::createCommandBuffers()
                 const MeshData &meshData = model_.getMeshData()[idxMesh];
                 const Mesh &mesh = model_.getMeshes()[idxMesh];
                 vkCmdBindPipeline(commandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline_);
-//                VkBuffer vertexBuffers[] = { vertexBuffer_ };
+
                 VkBuffer vertexBuffers[] = { meshData.vertexBuffer };
                 VkDeviceSize offsets[] = { 0 };
                 vkCmdBindVertexBuffers(commandBuffers_[i], 0, 1, vertexBuffers, offsets);
-                //vkCmdBindIndexBuffer(commandBuffers_[i], vertexIndexBuffer_, 0, VK_INDEX_TYPE_UINT16);
+
                 vkCmdBindIndexBuffer(commandBuffers_[i], meshData.vertexIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
                 vkCmdBindDescriptorSets(commandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout_, 0, 1, &descriptorSets_[i], 0, nullptr);
+
                 //1 used for the instanced rendering could be higher i think for multiple instanced
-                //vkCmdDrawIndexed(commandBuffers_[i], static_cast<uint32_t>(meshes_[0].indices.size()), 1, 0, 0, 0);
                 vkCmdDrawIndexed(commandBuffers_[i], static_cast<uint32_t>(mesh.indices.size()), 1, 0, 0, 0);
             }
 
@@ -1245,10 +1247,7 @@ void VulkanCore::cleanup()
         }
 
         model_.destroy();
-//        vkDestroyBuffer(logicalDevice_, vertexBuffer_, nullptr);
-//        vkFreeMemory(logicalDevice_, vertexBufferMemory_, nullptr);
-//        vkDestroyBuffer(logicalDevice_, vertexIndexBuffer_, nullptr);
-//        vkFreeMemory(logicalDevice_, vertexIndexBufferMemory_, nullptr);
+
 
         //Semaphores
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -1275,29 +1274,5 @@ void VulkanCore::cleanup()
         vkDestroyInstance(instance_, nullptr);
     }
 }
-
-//------------------------------------------------------------------------------
-
-/*
- * @brief : Returns the data well aligned in memory to be used in the corresponding shader stage(s)
- */
-std::array<float, 51> VulkanCore::UniformBufferObject::getConstData()
-{
-    std::array<float, 51> data;
-    memcpy(data.data(), model.constData(), 16 * sizeof (float));
-    memcpy(data.data() + 16, view.constData(), 16 * sizeof (float));
-    memcpy(data.data() + 32, projection.constData(), 16 * sizeof (float));
-    memcpy(data.data() + 48, &lightPos, 3 * sizeof (float));
-
-    return data;
-}
-
-//------------------------------------------------------------------------------
-
-constexpr uint32_t VulkanCore::UniformBufferObject::size()
-{
-    return 51 * sizeof(float);
-}
-
 
 }

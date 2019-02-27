@@ -1,7 +1,7 @@
 #ifndef CAMERA_HPP
 #define CAMERA_HPP
 
-#include <QVector3D>
+#include <glm/vec3.hpp>
 
 namespace renderer
 {
@@ -9,9 +9,9 @@ namespace renderer
 class Camera
 {
 protected:
-    QVector3D position_;
-    QVector3D center_; //Look at this point
-    QVector3D up_; //Defines the Up vector in world coordinates
+    glm::vec3 position_;
+    glm::vec3 center_; //Look at this point
+    glm::vec3 up_; //Defines the Up vector in world coordinates
     float fov_;
 
 public:
@@ -22,14 +22,14 @@ public:
     Camera();
     virtual ~Camera();
 
-    const QVector3D& getUp() const;
-    void setUp(const QVector3D &up);
+    const glm::vec3& getUp() const;
+    void setUp(const glm::vec3 &up);
     float getFov() const;
     void setFov(float fov);
-    const QVector3D& getPosition() const;
-    virtual void setPosition(const QVector3D &position);
-    const QVector3D& getCenter() const;
-    virtual void setCenter(const QVector3D &center);
+    const glm::vec3& getPosition() const;
+    virtual void setPosition(const glm::vec3 &position);
+    const glm::vec3& getCenter() const;
+    virtual void setCenter(const glm::vec3 &center);
 };
 
 }

@@ -1,8 +1,8 @@
 #ifndef VERTEX_HPP
 #define VERTEX_HPP
 
-#include <QVector3D>
-#include <QVector2D>
+#include <glm/vec3.hpp>
+#include <glm/vec2.hpp>
 #include <vulkan/vulkan.h>
 #include <array>
 
@@ -12,10 +12,10 @@ namespace renderer
 
 struct Vertex
 {
-    QVector3D pos;
+    glm::vec3 pos;
     //QVector3D color;
-    QVector3D normal;
-    QVector2D texCoord;
+    glm::vec3 normal;
+    glm::vec2 texCoord;
 
 	static VkVertexInputBindingDescription getBindingDescription();
     static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions();

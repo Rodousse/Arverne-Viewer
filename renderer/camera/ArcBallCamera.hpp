@@ -21,8 +21,8 @@ public:
     ArcBallCamera();
     virtual ~ArcBallCamera() override;
 
-    virtual void setPosition(const QVector3D &position) override;
-    virtual void setCenter(const QVector3D &position) override;
+    virtual void setPosition(const glm::vec3 &position) override;
+    virtual void setCenter(const glm::vec3 &position) override;
 
     void incrementPhi(float phiStep);
     void incrementTheta(float thetaStep);

@@ -4,28 +4,28 @@
 namespace renderer
 {
 
-const QVector3D& Camera::getPosition() const
+const glm::vec3& Camera::getPosition() const
 {
     return position_;
 }
 
 //------------------------------------------------------------------------------------------------------
 
-void Camera::setPosition(const QVector3D &position)
+void Camera::setPosition(const glm::vec3 &position)
 {
     position_ = position;
 }
 
 //------------------------------------------------------------------------------------------------------
 
-const QVector3D &Camera::getCenter() const
+const glm::vec3 &Camera::getCenter() const
 {
     return center_;
 }
 
 //------------------------------------------------------------------------------------------------------
 
-void Camera::setCenter(const QVector3D &center)
+void Camera::setCenter(const glm::vec3 &center)
 {
     center_ = center;
 }
@@ -50,14 +50,14 @@ Camera::~Camera()
 
 //------------------------------------------------------------------------------------------------------
 
-const QVector3D& Camera::getUp() const
+const glm::vec3& Camera::getUp() const
 {
     return up_;
 }
 
 //------------------------------------------------------------------------------------------------------
 
-void Camera::setUp(const QVector3D &up)
+void Camera::setUp(const glm::vec3 &up)
 {
     up_ = up;
 }

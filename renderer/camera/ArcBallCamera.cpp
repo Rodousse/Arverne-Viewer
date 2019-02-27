@@ -1,17 +1,19 @@
 #include "ArcBallCamera.hpp"
-#include <QtMath>
+#include <glm/gtc/constants.hpp>
+#include <algorithm>
 
 
 namespace renderer
 {
 
+const float M_PI = glm::pi<float>();
 
 
 ArcBallCamera::ArcBallCamera():
     Camera(),
-    phi_(3*M_PI/4.0),
-    theta_(M_PI),
-    radius_(2.0f)
+    radius_(2.0f),
+    phi_(3.0f*M_PI/4.0f),
+    theta_(M_PI)
 {
     computePosition();
 }
@@ -49,7 +51,7 @@ float ArcBallCamera::getPhi() const
 
 void ArcBallCamera::setPhi(float phi)
 {
-    phi_ = std::max(std::min(static_cast<float>(M_PI-0.01), phi), 0.01f);
+    phi_ = std::max(std::min(static_cast<float>(M_PI-0.01f), phi), 0.01f);
     computePosition();
 }
 
@@ -74,7 +76,7 @@ void ArcBallCamera::setTheta(float theta)
 
 //------------------------------------------------------------------------------------------------------
 
-void ArcBallCamera::setCenter(const QVector3D &center)
+void ArcBallCamera::setCenter(const glm::vec3 &center)
 {
     Camera::setCenter(center);
     computePosition();
@@ -82,7 +84,7 @@ void ArcBallCamera::setCenter(const QVector3D &center)
 
 //------------------------------------------------------------------------------------------------------
 
-void ArcBallCamera::setPosition(const QVector3D &position)
+void ArcBallCamera::setPosition(const glm::vec3 &position)
 {
     Camera::setPosition(position);
     computePolar();
@@ -113,9 +115,9 @@ void ArcBallCamera::incrementRadius(float radiusStep)
 
 void ArcBallCamera::computePosition()
 {
-    position_.setX(radius_ * sin(phi_) * cos(theta_));
-    position_.setY(radius_ * sin(phi_) * sin(theta_));
-    position_.setZ(radius_ * cos(phi_));
+    position_.x = radius_ * sin(phi_) * cos(theta_);
+    position_.y =radius_ * sin(phi_) * sin(theta_);
+    position_.z =radius_ * cos(phi_);
 
     position_ += center_;
 }
@@ -124,9 +126,9 @@ void ArcBallCamera::computePosition()
 
 void ArcBallCamera::computePolar()
 {
-    radius_ = sqrt(pow(position_.x(), 2)+pow(position_.y(), 2)+pow(position_.z(), 2));
-    theta_ = atan(position_.y()/position_.x());
-    phi_ = atan((pow(position_.x(), 2)+pow(position_.y(), 2))/position_.z());
+    radius_ = sqrt(pow(position_.x, 2)+pow(position_.y, 2)+pow(position_.z, 2));
+    theta_ = atan(position_.y/position_.x);
+    phi_ = atan((pow(position_.x, 2)+pow(position_.y, 2))/position_.z);
 }
 
 

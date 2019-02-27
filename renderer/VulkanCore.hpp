@@ -4,7 +4,8 @@
 #include <iostream>
 #include <vulkan/vulkan.h>
 #include <vector>
-#include <QMatrix4x4>
+#include <glm/mat4x4.hpp>
+#include <glm/vec3.hpp>
 #include "DebugMessenger.hpp"
 #include "PhysicalDeviceProvider.hpp"
 #include "Swapchain.hpp"
@@ -14,13 +15,14 @@
 #include "camera/Camera.hpp"
 #include "Mesh.hpp"
 #include "Model.hpp"
+#include <QString>
 
 namespace renderer
 {
 
-#ifndef NDEBUG
-const bool ENABLE_VALIDATION_LAYERS = true;
-#else 
+#ifdef NDEBUG
+const bool ENABLE_VALIDATION_LAYERS = false;
+#else
 const bool ENABLE_VALIDATION_LAYERS = true;
 #endif
 
@@ -41,32 +43,10 @@ protected :
 
 	struct UniformBufferObject
 	{
-        QMatrix4x4 model;
-        QMatrix4x4 view;
-        QMatrix4x4 projection;
-        QVector3D lightPos;
-        std::array<float, 51> getConstData();
-        static constexpr uint32_t size();
-	};
-
-	const std::vector<Vertex> VERTICES =
-	{
-        {{-0.5f,-0.5f,0.0f}, {1.0f,0.0f,0.0f}, {0.0f, 0.0f}},
-        {{0.5f,-0.5f,0.0f}, {1.0f,1.0f,1.0f}, {1.0f, 0.0f}},
-        {{-0.5f,0.5f,0.0f}, {0.0f,0.0f,1.0f}, {0.0f,1.0f}},
-        {{0.5f,0.5f,0.0f}, {0.0f,1.0f,0.0f}, {1.0f, 1.0f}},
-
-        {{-0.5f,-0.5f,0.5f}, {1.0f,0.0f,0.0f}, {0.0f, 0.0f}},
-        {{0.5f,-0.5f,0.5f}, {1.0f,1.0f,1.0f}, {1.0f, 0.0f}},
-        {{-0.5f,0.5f,0.5f}, {0.0f,0.0f,1.0f}, {0.0f,1.0f}},
-        {{0.5f,0.5f,0.5f}, {0.0f,1.0f,0.0f}, {1.0f, 1.0f}},
-	};
-
-
-	const std::vector<uint16_t> VERTEX_INDICES =
-	{
-        0,1,2,1,3,2,
-        4,5,6,5,7,6
+        glm::mat4x4 model;
+        glm::mat4x4 view;
+        glm::mat4x4 projection;
+        glm::vec3 lightPos;
 	};
 
 
