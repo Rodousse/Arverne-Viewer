@@ -1,11 +1,13 @@
-#include "MaterialTexture.hpp"
-#include "renderer/VulkanCore.hpp"
-#include <QImage>
+#include "renderer/texture/MaterialTexture.h"
+#include "renderer/VulkanCore.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
-namespace renderer{
+namespace renderer
+{
 
 
-MaterialTexture::MaterialTexture(const renderer::VulkanCore *pCore):
+MaterialTexture::MaterialTexture(const renderer::VulkanCore* pCore):
     MaterialTexture(pCore, VK_FORMAT_R8G8B8A8_UNORM)
 {
 
@@ -18,18 +20,21 @@ MaterialTexture::MaterialTexture(const VulkanCore* pCore, const VkFormat& format
 
 }
 
-MaterialTexture::MaterialTexture(const renderer::VulkanCore *pCore, const std::string &path, const VkFormat &format):
-    Texture2D (pCore, format),
+MaterialTexture::MaterialTexture(const renderer::VulkanCore* pCore, const std::string& path,
+                                 const VkFormat& format):
+    Texture2D(pCore, format),
     path_(path)
 {
 
 }
 
-void MaterialTexture::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
+void MaterialTexture::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth,
+                                      int32_t texHeight, uint32_t mipLevels)
 {
     VkFormatProperties formatProperties;
     vkGetPhysicalDeviceFormatProperties(pCore_->getPhysicalDevice(), imageFormat, &formatProperties);
-    if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
+
+    if(!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
     {
         throw std::runtime_error("Texture Image format does not support linear blitting");
     }
@@ -49,7 +54,7 @@ void MaterialTexture::generateMipmaps(VkImage image, VkFormat imageFormat, int32
     int32_t mipWidth = texWidth;
     int32_t mipHeight = texHeight;
 
-    for (uint32_t i = 1; i < mipLevels; i++)
+    for(uint32_t i = 1; i < mipLevels; i++)
     {
         barrier.subresourceRange.baseMipLevel = i - 1;
         barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
@@ -58,14 +63,14 @@ void MaterialTexture::generateMipmaps(VkImage image, VkFormat imageFormat, int32
         barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
         vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
-            VK_PIPELINE_STAGE_TRANSFER_BIT,
-            0,
-            0, nullptr,
-            0, nullptr,
-            1, &barrier);
+                             VK_PIPELINE_STAGE_TRANSFER_BIT,
+                             0,
+                             0, nullptr,
+                             0, nullptr,
+                             1, &barrier);
 
         VkImageBlit blit = {};
-        blit.srcOffsets[0] = { 0,0,0 };
+        blit.srcOffsets[0] = { 0, 0, 0 };
         blit.srcOffsets[1] = { mipWidth, mipHeight, 1 };
         blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         blit.srcSubresource.mipLevel = i - 1;
@@ -79,9 +84,9 @@ void MaterialTexture::generateMipmaps(VkImage image, VkFormat imageFormat, int32
         blit.dstSubresource.layerCount = 1;
 
         vkCmdBlitImage(commandBuffer,
-            image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-            image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            1, &blit, VK_FILTER_LINEAR);
+                       image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                       image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                       1, &blit, VK_FILTER_LINEAR);
 
         barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
         barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
@@ -89,13 +94,20 @@ void MaterialTexture::generateMipmaps(VkImage image, VkFormat imageFormat, int32
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
         vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
-            VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
-            0, nullptr,
-            0, nullptr,
-            1, &barrier);
+                             VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
+                             0, nullptr,
+                             0, nullptr,
+                             1, &barrier);
 
-        if (mipWidth > 1) { mipWidth /= 2; }
-        if (mipHeight > 1) { mipHeight /= 2; }
+        if(mipWidth > 1)
+        {
+            mipWidth /= 2;
+        }
+
+        if(mipHeight > 1)
+        {
+            mipHeight /= 2;
+        }
 
     }
 
@@ -105,15 +117,14 @@ void MaterialTexture::generateMipmaps(VkImage image, VkFormat imageFormat, int32
     barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
     barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
-    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-        0,
-        0, nullptr,
-        0, nullptr,
-        1, &barrier);
+    vkCmdPipelineBarrier(commandBuffer, VK_PIPELINE_STAGE_TRANSFER_BIT,
+                         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+                         0,
+                         0, nullptr,
+                         0, nullptr,
+                         1, &barrier);
 
     pCore_->getUtils().endSingleTimeCommands(commandBuffer, false);
-
-
 }
 
 
@@ -129,7 +140,8 @@ void MaterialTexture::createSampler()
     samplerInfo.anisotropyEnable = VK_TRUE;
     samplerInfo.maxAnisotropy = 16;
     samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
-    samplerInfo.unnormalizedCoordinates = VK_FALSE; //Use [0,1] for coordinate not [0, texWidth/texHeight]
+    samplerInfo.unnormalizedCoordinates =
+        VK_FALSE; //Use [0,1] for coordinate not [0, texWidth/texHeight]
     samplerInfo.compareEnable = VK_FALSE;
     samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
     samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
@@ -137,7 +149,7 @@ void MaterialTexture::createSampler()
     samplerInfo.minLod = 0.0f;
     samplerInfo.maxLod = 0.0f;
 
-    if (vkCreateSampler(pCore_->getDevice(), &samplerInfo, nullptr, &sampler_) != VK_SUCCESS)
+    if(vkCreateSampler(pCore_->getDevice(), &samplerInfo, nullptr, &sampler_) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create texture sampler");
     }
@@ -148,45 +160,53 @@ void MaterialTexture::createSampler()
 void MaterialTexture::createImage()
 {
 
-    QImage img(QString::fromStdString(path_));
-    if(img.isNull()){
-        qFatal("failed to load the image");
+    int texWidth, texHeight, texChannels;
+    stbi_uc* pixels = stbi_load(path_.data(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+    VkDeviceSize imageSize = texWidth * texHeight * 4;
+    mipLevels_ = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
+
+    if(!pixels)
+    {
+        throw std::runtime_error("failed to load texture image!");
     }
 
-    img = img.convertToFormat(QImage::Format_RGBA8888_Premultiplied);
-    mipLevels_ = static_cast<uint32_t>(std::floor(std::log2(std::max(img.width(), img.height())))) + 1;
+    mipLevels_ = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
+
     VkBuffer stageBuffer;
     VkDeviceMemory stageBufferMemory;
-    VkDeviceSize texSize = static_cast<unsigned long long>(img.width() * img.height() * 4);
 
-    pCore_->getUtils().createBuffer(texSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stageBuffer, stageBufferMemory);
-    void *pData;
-    vkMapMemory(pCore_->getDevice(), stageBufferMemory, 0, texSize, 0, &pData);
-    memcpy(pData, img.bits(), texSize);
+    pCore_->getUtils().createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stageBuffer,
+                                    stageBufferMemory);
+    void* pData;
+    vkMapMemory(pCore_->getDevice(), stageBufferMemory, 0, imageSize, 0, &pData);
+    memcpy(pData, pixels, imageSize);
     vkUnmapMemory(pCore_->getDevice(), stageBufferMemory);
 
-    //---------------------------------------------------------------
-
-    pCore_->getUtils().createImage(static_cast<uint32_t>(img.width()), static_cast<uint32_t>(img.height()), mipLevels_, VK_SAMPLE_COUNT_1_BIT, format_, VK_IMAGE_TILING_OPTIMAL,
-        VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image_, imageMemory_);
-    pCore_->getUtils().transitionImageLayout(image_, format_, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels_);
+    pCore_->getUtils().createImage(static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight),
+                                   mipLevels_, VK_SAMPLE_COUNT_1_BIT, format_, VK_IMAGE_TILING_OPTIMAL,
+                                   VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image_, imageMemory_);
+    pCore_->getUtils().transitionImageLayout(image_, format_, VK_IMAGE_LAYOUT_UNDEFINED,
+            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels_);
     //Copy the content of a VkBuffer into a VkImage format
     pCore_->getUtils().copyBufferToImage(stageBuffer, image_,
-        static_cast<uint32_t>(static_cast<uint32_t>(img.width())),
-        static_cast<uint32_t>(static_cast<uint32_t>(img.height())));
+                                         static_cast<uint32_t>(static_cast<uint32_t>(texWidth)),
+                                         static_cast<uint32_t>(static_cast<uint32_t>(texHeight)));
     //Transition the layout for shader ability to read it
     //pCore_->getUtils().transitionImageLayout(image_, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1);
-    generateMipmaps(image_, format_, img.width(), img.height(), mipLevels_);
+    generateMipmaps(image_, format_, texWidth, texHeight, mipLevels_);
 
     vkDestroyBuffer(pCore_->getDevice(), stageBuffer, nullptr);
     vkFreeMemory(pCore_->getDevice(), stageBufferMemory, nullptr);
+    stbi_image_free(pixels);
 }
 
 
 void MaterialTexture::createImageView()
 {
-    imageView_ = pCore_->getUtils().createImageView(format_, image_, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels_);
+    imageView_ = pCore_->getUtils().createImageView(format_, image_, VK_IMAGE_ASPECT_COLOR_BIT,
+                 mipLevels_);
 }
 
 
@@ -202,12 +222,12 @@ void MaterialTexture::destroy()
     Texture2D::destroy();
 }
 
-void MaterialTexture::setFilePath(const std::string & path)
+void MaterialTexture::setFilePath(const std::string& path)
 {
     path_.assign(path);
 }
 
-const VkSampler &MaterialTexture::getSampler() const
+const VkSampler& MaterialTexture::getSampler() const
 {
     return sampler_;
 }

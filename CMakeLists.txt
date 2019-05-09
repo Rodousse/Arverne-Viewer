@@ -1,12 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 
 
-set(ARVERNE_PROJECT_NAME "ArverneViewer")
+set(PROJECT_NAME "ArverneViewer")
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(${ARVERNE_PROJECT_NAME})
+project(${PROJECT_NAME})
 
 #CMake config
 
@@ -19,7 +19,7 @@ find_package(TinyObjLoader REQUIRED)
 find_package(stb REQUIRED)
 find_package(glm REQUIRED)
 find_package(plog REQUIRED)
-add_subdirectory(${PROJECT_SOURCE_DIR}/third_party/glfw)
+find_package(Qt5Widgets CONFIG REQUIRED)
 
 
 #Set the output directory for the binaries
@@ -41,8 +41,10 @@ include_directories(${CMAKE_BINARY_DIR}/include/)
 
 
 # Project subdirectories
+add_subdirectory(src/data)
 add_subdirectory(src/loader)
 add_subdirectory(src/renderer)
 add_subdirectory(src/application)
+
 
 

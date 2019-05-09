@@ -1,9 +1,9 @@
-#include "VkElement.hpp"
+#include "renderer/VkElement.h"
 
 namespace renderer
 {
 VkElement::VkElement(const VulkanCore* pCore) :
-	pCore_(pCore)
+    pCore_(pCore)
 {
 }
 

@@ -1,9 +1,9 @@
-#include "Material.hpp"
-namespace renderer{
+#include "renderer/Material.h"
+namespace renderer
+{
 
-
-Material::Material(const VulkanCore *pCore):
-    VkElement (pCore),
+Material::Material(const VulkanCore* pCore):
+    VkElement(pCore),
     albedo(pCore)
 {
 

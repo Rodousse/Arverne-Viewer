@@ -1,4 +1,4 @@
-#include "Vertex.hpp"
+#include "renderer/Vertex.h"
 
 
 namespace renderer
@@ -6,41 +6,35 @@ namespace renderer
 
 VkVertexInputBindingDescription Vertex::getBindingDescription()
 {
-	VkVertexInputBindingDescription bindingDescription = {};
+    VkVertexInputBindingDescription bindingDescription = {};
 
-	bindingDescription.binding = 0;
-	bindingDescription.stride = sizeof(Vertex);
-	bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX; // Also could be VK_VERTEX_INPUT_RATE_INSTANCE for instance rendering 
+    bindingDescription.binding = 0;
+    bindingDescription.stride = sizeof(Vertex);
+    bindingDescription.inputRate =
+        VK_VERTEX_INPUT_RATE_VERTEX; // Also could be VK_VERTEX_INPUT_RATE_INSTANCE for instance rendering
 
-	return bindingDescription;
+    return bindingDescription;
 }
 
 std::array<VkVertexInputAttributeDescription, 3> Vertex::getAttributeDescriptions()
 {
-	std::array<VkVertexInputAttributeDescription, 3> attribDescriptions = {};
-	attribDescriptions[0].binding = 0;
+    std::array<VkVertexInputAttributeDescription, 3> attribDescriptions = {};
+    attribDescriptions[0].binding = 0;
     attribDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
-	attribDescriptions[0].location = 0;
-	attribDescriptions[0].offset = offsetof(Vertex, pos);
+    attribDescriptions[0].location = 0;
+    attribDescriptions[0].offset = offsetof(data::VertexAttribute, pos);
 
-	attribDescriptions[1].binding = 0;
-	attribDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-	attribDescriptions[1].location = 1;
-    attribDescriptions[1].offset = offsetof(Vertex, normal);
+    attribDescriptions[1].binding = 0;
+    attribDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+    attribDescriptions[1].location = 1;
+    attribDescriptions[1].offset = offsetof(data::VertexAttribute, normal);
 
-	attribDescriptions[2].binding = 0;
-	attribDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
-	attribDescriptions[2].location = 2;
-	attribDescriptions[2].offset = offsetof(Vertex, texCoord);
+    attribDescriptions[2].binding = 0;
+    attribDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+    attribDescriptions[2].location = 2;
+    attribDescriptions[2].offset = offsetof(data::VertexAttribute, texCoord);
 
-	return attribDescriptions;
-
-
-}
-
-bool Vertex::operator==(const Vertex &other) const
-{
-    return pos == other.pos && normal == other.normal && texCoord == other.texCoord;
+    return attribDescriptions;
 }
 
 }

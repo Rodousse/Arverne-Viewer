@@ -1,4 +1,4 @@
-#include "QtImageLoader.hpp"
+#include "application/QtImageLoader.h"
 
 QtImageLoader::QtImageLoader():
     ImageLoader ()

@@ -1,4 +1,4 @@
-#include "VulkanApplication.hpp"
+#include "renderer/VulkanApplication.h"
 
 namespace renderer
 {
@@ -12,14 +12,14 @@ VulkanApplication::~VulkanApplication()
 {
 }
 
-void VulkanApplication::setName(const std::string & name)
+void VulkanApplication::setName(const std::string& name)
 {
-	name_.assign(name);
+    name_.assign(name);
 }
 
-const std::string & VulkanApplication::getName()const
+const std::string& VulkanApplication::getName()const
 {
-	return name_;
+    return name_;
 }
 
 }

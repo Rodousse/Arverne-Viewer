@@ -37,10 +37,13 @@ Whole install instructions :
 ```
 git clone https://github.com/Rodousse/Arvern-Viewer.git
 cd Arvern-Viewer
-git submodule init
-git submodule update
+git submodule update --init
+mkdir build
+cd build
+cmake ..
 ```
 
+You will have to set the Qt5Widgets directory path (path/to/Qt/5.x.x/yourCompiler/lib/cmake/Qt5Widgets) with cmake-gui or as argument with the cmake command.
 --- 
 ## Dependency
 
