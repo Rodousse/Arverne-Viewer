@@ -1,6 +1,7 @@
 #include "renderer/PhysicalDeviceProperties.h"
 #include <set>
 #include <string>
+#include <stdexcept>
 
 namespace renderer
 {

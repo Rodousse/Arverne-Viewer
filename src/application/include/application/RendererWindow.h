@@ -3,6 +3,7 @@
 #include "renderer/VulkanApplication.h"
 #include <QVulkanWindowRenderer>
 #include <QResizeEvent>
+#include <QWindow>
 #include "renderer/camera/ArcBallCamera.h"
 #include "application/ModelManager.h"
 

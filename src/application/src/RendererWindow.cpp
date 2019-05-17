@@ -1,6 +1,6 @@
 #include "application/RendererWindow.h"
 #include <time.h>
-
+#include <defines.h>
 
 
 
@@ -23,7 +23,11 @@ void RendererWindow::initCore()
     std::vector<const char*> extensions;
     //Strictly needed by qt
     extensions.push_back("VK_KHR_surface");
+#ifdef UNIX_
+    extensions.push_back("VK_KHR_xcb_surface");
+#elif WIN32_
     extensions.push_back("VK_KHR_win32_surface");
+#endif
     extensions.push_back("VK_EXT_debug_report"); // enable debug as qt log
     vkCore_.addRequiredExtensions(extensions.data(), static_cast<uint32_t>(extensions.size()));
 

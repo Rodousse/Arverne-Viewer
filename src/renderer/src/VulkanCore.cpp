@@ -1,10 +1,10 @@
-#include "defines.h"
 #include "renderer/VulkanCore.h"
 #include <algorithm>
 #include <set>
 #include <array>
 #include <fstream>
 #include <chrono>
+#include <cstring>
 #include "loader/ObjLoader.h"
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -22,6 +22,10 @@ VulkanCore::VulkanCore():
     {
         requiredExtensions_.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
+
+#ifdef UNIX_
+    //requiredExtensions_.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
+#endif
 }
 
 void VulkanCore::drawFrame()
@@ -231,7 +235,7 @@ void VulkanCore::createInstance()
     //Applications infos about the version, the engine version, the vulkan version used
     VkApplicationInfo appInfo = {};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    appInfo.pApplicationName = "PBR Viewer";
+    appInfo.pApplicationName = "Arverne Viewer";
     appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
     appInfo.pEngineName = "SuperViewerArverne";
     appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);

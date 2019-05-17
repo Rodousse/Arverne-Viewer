@@ -35,6 +35,14 @@ SET( CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/l
 
 # Add The configure file here : https://stackoverflow.com/questions/8887117/can-cmake-generate-configure-file
 set(RESOURCE_PATH ${PROJECT_SOURCE_DIR}/resources)
+set(WIN32_ 0)
+set(UNIX_ 0)
+if(UNIX)
+    set(UNIX_ 1)
+elseif(WIN32)
+    set(WIN32_ 1)
+endif()
+
 configure_file(config/cmake/defines.h.in include/defines.h @ONLY)
 include_directories(${CMAKE_BINARY_DIR}/include/)
 

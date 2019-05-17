@@ -1,4 +1,4 @@
-#include "application/mainwindow.h"
+#include "application/MainWindow.h"
 #include <QLayout>
 #include <QLabel>
 #include <QFileDialog>

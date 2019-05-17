@@ -18,7 +18,7 @@ set(SOURCES
 include_directories(include ${PLOG_INCLUDE_DIR})
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-target_link_libraries(${PROJECT_NAME} renderer Qt5::Widgets)
+target_link_libraries(${PROJECT_NAME} renderer Qt5::Widgets Qt5::Gui)
 
 ##add resources in the exe folder
 #add_custom_command(TARGET ${PROJECT_NAME}  PRE_BUILD

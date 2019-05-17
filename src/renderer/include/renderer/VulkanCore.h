@@ -1,4 +1,11 @@
 #pragma once
+#include <defines.h>
+
+#ifdef WIN32_
+#define VK_USE_PLATFORM_WIN32_KHR
+#elif UNIX_
+#define VK_USE_PLATFORM_XCB_KHR
+#endif
 
 #include <iostream>
 #include <vulkan/vulkan.h>

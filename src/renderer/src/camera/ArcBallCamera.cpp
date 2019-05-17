@@ -1,13 +1,15 @@
 #include "renderer/camera/ArcBallCamera.h"
 #include <glm/gtc/constants.hpp>
 #include <algorithm>
+#include <math.h>
 
 
 namespace renderer
 {
 
-const float M_PI = glm::pi<float>();
-
+#ifndef M_PI
+    const float M_PI = glm::pi<float>();
+#endif
 
 ArcBallCamera::ArcBallCamera():
     Camera(),

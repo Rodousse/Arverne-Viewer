@@ -1,5 +1,7 @@
 #include "renderer/Model.h"
 #include "renderer/VulkanCore.h"
+#include <algorithm>
+#include <cstring>
 
 namespace renderer
 {

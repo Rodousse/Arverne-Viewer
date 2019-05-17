@@ -1,6 +1,7 @@
 
 #include <exception>
 #include <iostream>
+#include <cstring>
 
 #include "renderer/DebugMessenger.h"
 
