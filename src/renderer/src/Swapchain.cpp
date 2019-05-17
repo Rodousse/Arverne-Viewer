@@ -40,7 +40,7 @@ void Swapchain::createFramebuffers(const VkRenderPass& renderPass,
                                    const std::vector<VkImageView>& attachements)
 {
 
-    std::cout << "Creating Framebuffers..." << std::endl;
+    PLOGD << "Creating Framebuffers..." << '\n';
     framebuffers_.resize(imageViews_.size());
     std::vector<VkImageView> frameAttachements;
     frameAttachements.insert(frameAttachements.begin(), attachements.begin(), attachements.end());
@@ -67,7 +67,7 @@ void Swapchain::createFramebuffers(const VkRenderPass& renderPass,
         frameAttachements.pop_back();
     }
 
-    std::cout << "Framebuffers Created" << std::endl;
+    PLOGD << "Framebuffers Created" << '\n';
 }
 
 void Swapchain::destroyFramebuffers()

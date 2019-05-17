@@ -7,7 +7,7 @@
 #define VK_USE_PLATFORM_XCB_KHR
 #endif
 
-#include <iostream>
+#include <plog/Log.h>
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <glm/mat4x4.hpp>

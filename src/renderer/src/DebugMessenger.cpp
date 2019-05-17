@@ -1,6 +1,5 @@
-
+#include <plog/Log.h>
 #include <exception>
-#include <iostream>
 #include <cstring>
 
 #include "renderer/DebugMessenger.h"
@@ -33,7 +32,7 @@ DebugMessenger::~DebugMessenger()
 
 void DebugMessenger::create()
 {
-    std::cout << "Set up debug callback" << std::endl;
+    PLOGD << "Set up debug callback" << '\n';
 
     VkDebugUtilsMessengerCreateInfoEXT debugInfo = {};
     debugInfo.sType =
@@ -89,7 +88,25 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugMessenger::debugCallback(
     const VkDebugUtilsMessengerCallbackDataEXT* pCallBackData,
     void* pUserData)
 {
-    (pCallBackData->pMessage);
+    switch(messageSeverity)
+    {
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+            PLOGI << pCallBackData->pMessage << "\n";
+            break;
+
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+            PLOGV << pCallBackData->pMessage << "\n";
+            break;
+
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+            PLOGW << pCallBackData->pMessage << "\n";
+            break;
+
+        case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+            PLOGE << pCallBackData->pMessage << "\n";
+            break;
+    }
+
     return VK_FALSE;
 }
 

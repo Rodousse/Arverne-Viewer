@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <plog/Log.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -35,7 +36,7 @@ bool ObjLoader::load(const std::string& path, std::vector<data::Mesh>& scene)
 
     if(!err.empty())
     {
-        std::cout << err.data() << std::endl;
+        PLOGE << err.data() << '\n';
     }
 
     if(!ret)

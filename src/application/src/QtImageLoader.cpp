@@ -13,7 +13,7 @@ void QtImageLoader::loadImage(const std::string& path)
     image_.load(QString::fromStdString(path));
 
     if(image_.isNull()){
-        qFatal("failed to load the image");
+        PLOGE << ("failed to load the image") << '\n';
     }
     switch(format_)
     {

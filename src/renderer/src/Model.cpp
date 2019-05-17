@@ -2,6 +2,7 @@
 #include "renderer/VulkanCore.h"
 #include <algorithm>
 #include <cstring>
+#include <plog/Log.h>
 
 namespace renderer
 {
@@ -123,13 +124,13 @@ void Model::createVertexBuffer(const data::Mesh& mesh, MeshData& meshData)
                                   bufferSize);
     vkDestroyBuffer(pCore_->getDevice(), stagingBuffer, nullptr);
     vkFreeMemory(pCore_->getDevice(), stagingBufferMemory, nullptr);
-    std::cout << "Vertex Buffer Created" << std::endl;
+    PLOGD << "Vertex Buffer Created for mesh : " << name_ << '\n';
 }
 
 void Model::createVertexIndexBuffer(const data::Mesh& mesh,
                                     MeshData& meshData)
 {
-    std::cout << "Creating and Allocating Index Buffer" << std::endl;
+    PLOGD << "Creating and Allocating Index Buffer for mesh : " << name_ << '\n';
     VkDeviceSize bufferSize = sizeof(mesh.indices[0]) * mesh.indices.size();
     VkBufferUsageFlags usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT |
                                VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
@@ -152,7 +153,7 @@ void Model::createVertexIndexBuffer(const data::Mesh& mesh,
                                   bufferSize);
     vkDestroyBuffer(pCore_->getDevice(), stagingBuffer, nullptr);
     vkFreeMemory(pCore_->getDevice(), stagingBufferMemory, nullptr);
-    std::cout << "Index Buffer Created" << std::endl;
+    PLOGD << "Index Buffer Created for mesh : " << name_ << '\n';
 }
 
 //void Model::setDefaultMaterial(const Material &material)

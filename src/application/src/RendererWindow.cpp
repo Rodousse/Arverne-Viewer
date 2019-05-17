@@ -61,7 +61,6 @@ void RendererWindow::initInstance(QVulkanInstance* instance)
 
 void RendererWindow::createSurface()
 {
-    qDebug("Creating Surface...");
     VkSurfaceKHR surface;
     surface = vulkanInstance()->surfaceForWindow(this);
     vkCore_.setSurface(surface);

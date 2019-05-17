@@ -134,7 +134,7 @@ void VulkanCore::initVulkan()
     createCommandBuffers();
     createSyncObjects();
 
-    std::cout << "Vulkan Initialisation Finished" << std::endl;
+    PLOGD << "Vulkan Initialisation Finished" << '\n';
 }
 
 void VulkanCore::setSurface(const VkSurfaceKHR& surface)
@@ -231,7 +231,7 @@ void VulkanCore::createInstance()
         throw std::runtime_error("Some Extensions are not compatible !");
     }
 
-    std::cout << "Vulkan Instance Creation..." << std::endl;
+    PLOGD << "Vulkan Instance Creation..." << '\n';
     //Applications infos about the version, the engine version, the vulkan version used
     VkApplicationInfo appInfo = {};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -273,7 +273,7 @@ void VulkanCore::createInstance()
         debugMessenger_.create();
     }
 
-    std::cout << "Vulkan Instance Created" << std::endl;
+    PLOGD << "Vulkan Instance Created" << '\n';
 }
 
 void VulkanCore::resizeExtent(int width, int height)
@@ -308,11 +308,11 @@ VkResult VulkanCore::areInstanceExtensionsCompatible(const char** extensions,
     std::vector<VkExtensionProperties> vkExtensions(vkExtensionCount);
     vkEnumerateInstanceExtensionProperties(nullptr, &vkExtensionCount, vkExtensions.data());
 
-    std::cout << "Number of vulkan extensions available " << vkExtensionCount << std::endl;
+    PLOGD << "Number of vulkan extensions available " << vkExtensionCount << '\n';
 
     for(const auto& extension : vkExtensions)
     {
-        std::cout << "\t" << extension.extensionName << std::endl;
+        PLOGD << "\t" << extension.extensionName << '\n';
     }
 
     //If an extension passed in the parameter is not in the list of the vulkan available extensions, we can't create the instance
@@ -340,7 +340,7 @@ VkFormat VulkanCore::findDepthFormat()
 
 void VulkanCore::pickPhysicalDevice()
 {
-    std::cout << "Picking a physical device" << std::endl;
+    PLOGD << "Picking a physical device" << '\n';
     PhysicalDeviceProvider phyProvider(this, DEVICE_EXTENSIONS);
 
     phyProvider.setRequiredDeviceFeatures(requiredDeviceFeatures_);
@@ -350,13 +350,13 @@ void VulkanCore::pickPhysicalDevice()
     physicalDeviceProperties_.setPhysicalDevice(&physicalDevice_);
     physicalDeviceProperties_.setSurface(&surface_);
     msaaSamples_ = getMaxUsableSampleCount();
-    std::cout << physicalDeviceProperties_.getVkPhysicalDeviceProperties().deviceName <<
-              " : I chose you !!!!" << std::endl;
+    PLOGD << physicalDeviceProperties_.getVkPhysicalDeviceProperties().deviceName <<
+          " : I chose you !!!!" << '\n';
 }
 
 void VulkanCore::createLogicalDevice()
 {
-    std::cout << "Creating a logical device..." << std::endl;
+    PLOGD << "Creating a logical device..." << '\n';
     QueueFamilyIndices indices = physicalDeviceProperties_.getQueueFamilyIndices();
     float queuePriority = 1.0f;
 
@@ -406,22 +406,22 @@ void VulkanCore::createLogicalDevice()
     vkGetDeviceQueue(logicalDevice_, indices.presentingFamily, 0, &presentQueue_);
     vkGetDeviceQueue(logicalDevice_, indices.transferFamily, 0, &transfertQueue_);
 
-    std::cout << "Logical device created" << std::endl;
+    PLOGD << "Logical device created" << '\n';
 }
 
 void VulkanCore::createSwapChain()
 {
-    std::cout << "Swapchain Creation..." << std::endl;
+    PLOGD << "Swapchain Creation..." << '\n';
 
     swapchain_.setExtent(windowExtent_);
     swapchain_.create();
 
-    std::cout << "Swapchain created" << std::endl;
+    PLOGD << "Swapchain created" << '\n';
 }
 
 void VulkanCore::createRenderPass()
 {
-    std::cout << "Creating Render Pass..." << std::endl;
+    PLOGD << "Creating Render Pass..." << '\n';
 
     VkAttachmentDescription colorAttachment = {};
 
@@ -506,12 +506,12 @@ void VulkanCore::createRenderPass()
         throw std::runtime_error("failed to create Render pass!");
     }
 
-    std::cout << "Render Pass Created" << std::endl;
+    PLOGD << "Render Pass Created" << '\n';
 }
 
 void VulkanCore::createDescriptorSetLayout()
 {
-    std::cout << "Creating Descriptor Set Layout..." << std::endl;
+    PLOGD << "Creating Descriptor Set Layout..." << '\n';
     VkDescriptorSetLayoutBinding uboLayoutBinding = {};
     uboLayoutBinding.binding = 0; //Value in shader "layout(binding = 0) uniform"
     uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -539,12 +539,12 @@ void VulkanCore::createDescriptorSetLayout()
         throw std::runtime_error("failed to create descriptor set layout!");
     }
 
-    std::cout << "Descriptor Set Layout Created" << std::endl;
+    PLOGD << "Descriptor Set Layout Created" << '\n';
 }
 
 void VulkanCore::createGraphicsPipeline()
 {
-    std::cout << "Creating Graphics Pipeline..." << std::endl;
+    PLOGD << "Creating Graphics Pipeline..." << '\n';
     auto vertexShader = readFile(std::string(RESOURCE_PATH) + "/shaders/vert.spv");
     auto fragmentShader = readFile(std::string(RESOURCE_PATH) + "/shaders/frag.spv");
 
@@ -698,12 +698,12 @@ void VulkanCore::createGraphicsPipeline()
     vkDestroyShaderModule(logicalDevice_, vertexShaderModule, nullptr);
     vkDestroyShaderModule(logicalDevice_, fragmentShaderModule, nullptr);
 
-    std::cout << "Graphics Pipeline Created" << std::endl;
+    PLOGD << "Graphics Pipeline Created" << '\n';
 }
 
 void VulkanCore::createCommandPool()
 {
-    std::cout << "Creating Command Pools..." << std::endl;
+    PLOGD << "Creating Command Pools..." << '\n';
     QueueFamilyIndices indices = physicalDeviceProperties_.getQueueFamilyIndices();
 
     //Create a command pool only for graphics operations
@@ -727,7 +727,7 @@ void VulkanCore::createCommandPool()
         }
     }
 
-    std::cout << "Command Pools Created" << std::endl;
+    PLOGD << "Command Pools Created" << '\n';
 }
 
 void VulkanCore::createDepthRessources()
@@ -768,7 +768,7 @@ void VulkanCore::recreateCommandBuffer()
 
 void VulkanCore::createVertexBuffer()
 {
-    std::cout << "Creating and Allocating Vertex Buffer" << std::endl;
+    PLOGD << "Creating and Allocating Vertex Buffer" << '\n';
     VkDeviceSize bufferSize = sizeof(meshes_[0].vertices[0]) * meshes_[0].vertices.size();
     VkBufferUsageFlags usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
@@ -793,13 +793,13 @@ void VulkanCore::createVertexBuffer()
 
     vkDestroyBuffer(logicalDevice_, stagingBuffer, nullptr);
     vkFreeMemory(logicalDevice_, stagingBufferMemory, nullptr);
-    std::cout << "Vertex Buffer Created" << std::endl;
+    PLOGD << "Vertex Buffer Created" << '\n';
 }
 
 void VulkanCore::createVertexIndexBuffer()
 {
 
-    std::cout << "Creating and Allocating Index Buffer" << std::endl;
+    PLOGD << "Creating and Allocating Index Buffer" << '\n';
     VkDeviceSize bufferSize = sizeof(meshes_[0].indices[0]) * meshes_[0].indices.size();
     VkBufferUsageFlags usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
     VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
@@ -824,12 +824,12 @@ void VulkanCore::createVertexIndexBuffer()
 
     vkDestroyBuffer(logicalDevice_, stagingBuffer, nullptr);
     vkFreeMemory(logicalDevice_, stagingBufferMemory, nullptr);
-    std::cout << "Index Buffer Created" << std::endl;
+    PLOGD << "Index Buffer Created" << '\n';
 }
 
 void VulkanCore::createUniformBuffer()
 {
-    std::cout << "Creating Uniform Buffer..." << std::endl;
+    PLOGD << "Creating Uniform Buffer..." << '\n';
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
 
     uniformBuffers_.resize(swapchain_.getImageViews().size());
@@ -842,7 +842,7 @@ void VulkanCore::createUniformBuffer()
                                 uniformBuffers_[i], uniformBuffersMemory_[i]);
     }
 
-    std::cout << "Uniform Buffer Created" << std::endl;
+    PLOGD << "Uniform Buffer Created" << '\n';
 }
 
 void VulkanCore::updateUniformBuffer(uint32_t imageIndex)
@@ -879,7 +879,7 @@ void VulkanCore::updateUniformBuffer(uint32_t imageIndex)
 
 void VulkanCore::createDescriptorPool()
 {
-    std::cout << "Creating Descriptor Pool..." << std::endl;
+    PLOGD << "Creating Descriptor Pool..." << '\n';
 
     std::array<VkDescriptorPoolSize, 2> descPoolSizes = {};
     //UBO
@@ -902,12 +902,12 @@ void VulkanCore::createDescriptorPool()
         throw std::runtime_error("failed to create descriptor pool!");
     }
 
-    std::cout << "Descriptor Pool Created" << std::endl;
+    PLOGD << "Descriptor Pool Created" << '\n';
 }
 
 void VulkanCore::createDescriptorSets()
 {
-    std::cout << "Creating Descriptor Sets..." << std::endl;
+    PLOGD << "Creating Descriptor Sets..." << '\n';
     std::vector<VkDescriptorSetLayout> layouts(swapchain_.getImages().size(), descriptorSetLayout_);
     VkDescriptorSetAllocateInfo descAlloc = {};
     descAlloc.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -955,7 +955,7 @@ void VulkanCore::createDescriptorSets()
                                0, nullptr);
     }
 
-    std::cout << "Descriptor Sets Created" << std::endl;
+    PLOGD << "Descriptor Sets Created" << '\n';
 }
 
 /*@brief :  Create the command buffers associated with the command pool
@@ -964,7 +964,7 @@ void VulkanCore::createDescriptorSets()
 */
 void VulkanCore::createCommandBuffers()
 {
-    std::cout << "Creating and Recording Command Buffers..." << std::endl;
+    PLOGD << "Creating and Recording Command Buffers..." << '\n';
     commandBuffers_.resize(swapchain_.getFramebuffers().size());
 
     VkCommandBufferAllocateInfo allocateBufferInfo = {};
@@ -1037,13 +1037,13 @@ void VulkanCore::createCommandBuffers()
 
     }
 
-    std::cout << "Command Buffers Created" << std::endl;
+    PLOGD << "Command Buffers Created" << '\n';
 }
 
 void VulkanCore::createSyncObjects()
 {
 
-    std::cout << "Creating Synchronization Objects..." << std::endl;
+    PLOGD << "Creating Synchronization Objects..." << '\n';
     imageAvailableSemaphore_.resize(MAX_FRAMES_IN_FLIGHT);
     renderFinishedSemaphore_.resize(MAX_FRAMES_IN_FLIGHT);
     inFlightFences_.resize(MAX_FRAMES_IN_FLIGHT);
@@ -1067,7 +1067,7 @@ void VulkanCore::createSyncObjects()
         }
     }
 
-    std::cout << "Synchronization Objects Created" << std::endl;
+    PLOGD << "Synchronization Objects Created" << '\n';
 }
 
 void VulkanCore::checkApplicationState()
@@ -1111,7 +1111,7 @@ std::vector<char> VulkanCore::readFile(const std::string& fileName)
 
 VkShaderModule VulkanCore::createShaderModule(const std::vector<char>& shaderCode)
 {
-    std::cout << "Creating Shader Modules..." << std::endl;
+    PLOGD << "Creating Shader Modules..." << '\n';
     VkShaderModuleCreateInfo shaderInfo = {};
     shaderInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
     shaderInfo.codeSize = shaderCode.size();
@@ -1124,7 +1124,7 @@ VkShaderModule VulkanCore::createShaderModule(const std::vector<char>& shaderCod
         throw std::runtime_error("failed to create shader module!");
     }
 
-    std::cout << "Shader Module Created" << std::endl;
+    PLOGD << "Shader Module Created" << '\n';
 
     return shaderModule;
 }

@@ -1,5 +1,6 @@
 #include "application/MainWindow.h"
 #include "application/RendererWindow.h"
+#include <plog/Log.h>
 #include <QApplication>
 #include <QLoggingCategory>
 #include <QVulkanInstance>
@@ -7,6 +8,7 @@
 
 int main(int argc, char* argv[])
 {
+    plog::init(plog::verbose, "./log.txt");
     QApplication a(argc, argv);
 
     const bool dbg = qEnvironmentVariableIntValue("QT_VK_DEBUG");
@@ -36,7 +38,7 @@ int main(int argc, char* argv[])
 
     if(!instance.create())
     {
-        qFatal("failed to create vulkan instance : %d", instance.errorCode());
+        PLOGE << "failed to create vulkan instance : " <<  instance.errorCode() << '\n';
     }
 
     vulkanWindow->setVulkanInstance(&instance);
