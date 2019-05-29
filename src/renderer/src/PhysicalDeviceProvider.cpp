@@ -37,12 +37,12 @@ bool PhysicalDeviceProvider::isDeviceSuitable(VkPhysicalDevice device)const
 bool PhysicalDeviceProvider::isDeviceContainingFeatures(const VkPhysicalDeviceFeatures& features)
 const
 {
-    for(size_t i = 0; i < sizeof(const VkPhysicalDeviceFeatures) / sizeof(VkBool32); i++)
+    for(size_t featureIndex = 0;
+        featureIndex < sizeof(const VkPhysicalDeviceFeatures) / sizeof(VkBool32); featureIndex++)
     {
-        const VkBool32* currentFeature = (reinterpret_cast<const VkBool32*>(&features))
-                                         + (i * sizeof(VkBool32));
-        const VkBool32* currentRequiredFeature = (reinterpret_cast<const VkBool32*>(&requiredFeatures_)) +
-                (i * sizeof(VkBool32));
+        const VkBool32* currentFeature = (reinterpret_cast<const VkBool32*>(&features)) + featureIndex;
+        const VkBool32* currentRequiredFeature = (reinterpret_cast<const VkBool32*>
+                (&requiredFeatures_)) + featureIndex;
 
         if(*currentFeature != *currentRequiredFeature && *currentRequiredFeature == VK_TRUE)
         {
