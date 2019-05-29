@@ -60,6 +60,9 @@ https://doc.qt.io/qt-5/configure-options.html
 This project uses different dependencies :
 
 - [TinyObjLoader](https://github.com/syoyo/tinyobjloader.git) : Used to load obj files to render (Credit to [syoyo](https://github.com/syoyo))
-- [Eigen](https://github.com/eigenteam/eigen-git-mirror) : Matrice and vector manipulation
+- [GLM](https://github.com/g-truc/glm) : Matrice and vector manipulation
+- [STB](https://github.com/nothings/stb) : Texture Loading
+- [PLog](https://github.com/SergiusTheBest/plog.git) : Output redirection in a file
+
 
 ---
