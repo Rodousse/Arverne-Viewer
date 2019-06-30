@@ -15,17 +15,13 @@ VulkanCore::VulkanCore():
     debugMessenger_(this, &instance_),
     swapchain_(this),
     utilities_(this),
-    lenaTexture_(this, std::string(RESOURCE_PATH) + "/textures/texture.jpg", VK_FORMAT_R8G8B8A8_UNORM),
+    lenaTexture_(this, std::string(RESOURCE_PATH) + "/textures/default.bmp", VK_FORMAT_R8G8B8A8_UNORM),
     model_(this)
 {
     if(ENABLE_VALIDATION_LAYERS)
     {
         requiredExtensions_.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
-
-#ifdef UNIX_
-    //requiredExtensions_.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
-#endif
 }
 
 void VulkanCore::drawFrame()
@@ -284,6 +280,7 @@ void VulkanCore::resizeExtent(int width, int height)
     physicalDeviceProperties_.refreshProperties(); //Used for querySwapChainSupport
 }
 
+// TODO : Make it a pointer so that it don't have to do assignation opperations
 void VulkanCore::setCamera(const Camera& camera)
 {
     camera_ = camera;

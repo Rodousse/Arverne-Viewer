@@ -20,8 +20,9 @@ private:
     bool initialized_ = false;
     bool isFullscreen = false;
 
-    const float ANGLE_INCREMENT_STEP = 0.01f;
-    const float RADIUS_INCREMENT_STEP = 0.5f;
+    static constexpr float MOVE_INCREMENT_STEP = 0.001f;
+    static constexpr float ANGLE_INCREMENT_STEP = 0.01f;
+    static constexpr float RADIUS_INCREMENT_STEP = 0.1f;
     Qt::MouseButton mouseButtonPressed_ = Qt::NoButton;
     QPoint mouseLastPosition_;
     renderer::ArcBallCamera camera_;
@@ -55,9 +56,9 @@ public:
     bool event(QEvent* e) override;
     //--------------------------------------------
 
-    void loadNewMesh(const std::string& path);
     ModelManager& getModelManager();
     const ModelManager& getModelManager()const;
+    void resetCamera();
     void initInstance(QVulkanInstance* instance);
     void setAngle(uint16_t angle);
 

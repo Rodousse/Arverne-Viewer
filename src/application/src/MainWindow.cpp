@@ -24,6 +24,7 @@ void MainWindow::loadObjFile()
     if(filePath.size())
     {
         renderer_->getModelManager().loadNewMesh(filePath.toStdString());
+        renderer_->resetCamera();
     }
 
     refreshModelSelection();
@@ -36,6 +37,7 @@ void MainWindow::changeModelSelected(int index)
         return;
 
     renderer_->getModelManager().setSelectedModel(index);
+    renderer_->resetCamera();
 }
 
 MainWindow::MainWindow(QWindow* vulkanWindow):

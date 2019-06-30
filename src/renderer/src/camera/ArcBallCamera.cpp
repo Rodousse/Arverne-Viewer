@@ -1,5 +1,6 @@
 #include "renderer/camera/ArcBallCamera.h"
 #include <glm/gtc/constants.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <algorithm>
 #include <math.h>
 
@@ -8,7 +9,7 @@ namespace renderer
 {
 
 #ifndef M_PI
-    const float M_PI = glm::pi<float>();
+const float M_PI = glm::pi<float>();
 #endif
 
 ArcBallCamera::ArcBallCamera():
@@ -53,9 +54,9 @@ float ArcBallCamera::getTheta() const
 
 void ArcBallCamera::setTheta(float theta)
 {
-    if(theta > 2 * M_PI)
+    if(std::abs(theta) > 2 * M_PI)
     {
-        theta_ = theta - 2 * M_PI;
+        theta_ = std::abs(theta) - 2 * M_PI;
     }
 
     theta_ = theta;
@@ -65,6 +66,7 @@ void ArcBallCamera::setTheta(float theta)
 void ArcBallCamera::setCenter(const glm::vec3& center)
 {
     Camera::setCenter(center);
+    computePolar();
     computePosition();
 }
 
@@ -95,12 +97,13 @@ void ArcBallCamera::computePosition()
     position_.y = radius_ * sin(phi_) * sin(theta_);
     position_.z = radius_ * cos(phi_);
 
-    position_ += center_;
+    Camera::setPosition(position_ + center_);
 }
 
 void ArcBallCamera::computePolar()
 {
-    radius_ = sqrt(pow(position_.x, 2) + pow(position_.y, 2) + pow(position_.z, 2));
+    glm::vec3 positionFromCenter = position_ - center_;
+    radius_ = positionFromCenter.length();
     theta_ = atan(position_.y / position_.x);
     phi_ = atan((pow(position_.x, 2) + pow(position_.y, 2)) / position_.z);
 }

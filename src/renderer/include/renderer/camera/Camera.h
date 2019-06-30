@@ -10,12 +10,19 @@ class Camera
 protected:
     glm::vec3 position_;
     glm::vec3 center_; //Look at this point
-    glm::vec3 up_; //Defines the Up vector in world coordinates
+    glm::vec3 upWorld_; //Defines the Up vector in world coordinates
+    glm::vec3 right_;
+    glm::vec3 up_;
     float fov_;
+
+    virtual void refresh();
 
 public:
     Camera();
     virtual ~Camera();
+
+    void moveRight(float amplitude);
+    void moveUp(float amplitude);
 
     const glm::vec3& getUp() const;
     void setUp(const glm::vec3& up);

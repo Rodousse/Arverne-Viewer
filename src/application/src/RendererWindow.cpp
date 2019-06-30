@@ -98,8 +98,11 @@ void RendererWindow::resizeEvent(QResizeEvent* e)
 
 void RendererWindow::processWheelEvent(const QWheelEvent* e)
 {
-    camera_.incrementRadius(-e->angleDelta().y() * RADIUS_INCREMENT_STEP * 1.0f /
-                            120.0f); //We divide by 120 because of the wheel step of the average mouse beeing 120 units
+    //We divide by 120 because of the wheel step of the average mouse beeing 120 units
+    float radiusIncrement = -e->angleDelta().y() / 120.0f;
+    radiusIncrement *= RADIUS_INCREMENT_STEP;
+    radiusIncrement *= camera_.getRadius();
+    camera_.incrementRadius(radiusIncrement);
 }
 
 void RendererWindow::processLeftMouseButtonEvent(const QMouseEvent* e)
@@ -117,7 +120,11 @@ void RendererWindow::processRightMouseButtonEvent(const QMouseEvent* e)
 
 void RendererWindow::processMiddleMouseButtonEvent(const QMouseEvent* e)
 {
-
+    QPointF delta = QPointF(e->pos() - mouseLastPosition_) * MOVE_INCREMENT_STEP;
+    delta *= camera_.getRadius();
+    camera_.moveRight(delta.x());
+    camera_.moveUp(-delta.y());
+    mouseLastPosition_ = e->pos();
 }
 
 
@@ -211,11 +218,6 @@ bool RendererWindow::event(QEvent* e)
     return QWindow::event(e);
 }
 
-void RendererWindow::loadNewMesh(const std::string& path)
-{
-    modelManager_.loadNewMesh(path);
-}
-
 ModelManager& RendererWindow::getModelManager()
 {
     return modelManager_;
@@ -224,6 +226,13 @@ ModelManager& RendererWindow::getModelManager()
 const ModelManager& RendererWindow::getModelManager() const
 {
     return modelManager_;
+}
+
+void RendererWindow::resetCamera()
+{
+    camera_.setCenter(glm::vec3(0.0));
+    camera_.setRadius(5.0f);
+    vkCore_.setCamera(camera_);
 }
 
 
