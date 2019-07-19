@@ -1,3 +1,12 @@
 [submodule "tinyobjloader"]
 	path = third_party/tinyobjloader
 	url = https://github.com/syoyo/tinyobjloader
+[submodule "third_party/glm"]
+	path = third_party/glm
+	url = https://github.com/g-truc/glm
+[submodule "third_party/stb"]
+	path = third_party/stb
+	url = https://github.com/nothings/stb
+[submodule "third_party/plog"]
+	path = third_party/plog
+	url = https://github.com/SergiusTheBest/plog.git

@@ -1,0 +1,5 @@
+#pragma once
+
+#cmakedefine RESOURCE_PATH "@RESOURCE_PATH@"
+#cmakedefine WIN32_ @WIN32_@
+#cmakedefine UNIX_ @UNIX_@

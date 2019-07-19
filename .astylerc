@@ -1,0 +1,36 @@
+#brackets style
+--style=allman
+
+#indentation
+--indent=spaces=4
+--min-conditional-indent=0
+# --max-continuation-indent=72
+--indent-switches
+--convert-tabs
+
+#Add an empty line around blocks
+--break-blocks
+
+#add a white space around operations
+--pad-oper
+#remove useless space around parenthesis
+--unpad-paren
+
+#Supress empty lines
+#--delete-empty-lines
+
+# "*" is stick to the type on reference
+--align-pointer=type
+
+# "&" is stick to the type on reference
+--align-reference=type
+
+#break at else, catch statement
+--break-closing-braces
+#no break after return type of functions
+--attach-return-type
+
+--close-templates
+
+--max-code-length=100
+
