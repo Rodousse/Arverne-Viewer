@@ -71,15 +71,15 @@ bool ObjLoader::load(const std::string& path, std::vector<data::Mesh>& scene)
                 if(idx.vertex_index > -1)
                 {
                     indexTemp = idx.vertex_index * 3;
-                    vertex.pos = glm::vec3(attrib.vertices[indexTemp], attrib.vertices[indexTemp + 1],
-                                           attrib.vertices[indexTemp + 2]);
+                    vertex.pos = glm::vec3(attrib.vertices[indexTemp], -attrib.vertices[indexTemp + 2],
+                                           attrib.vertices[indexTemp + 1]);
                 }
 
                 if(idx.normal_index > -1)
                 {
                     indexTemp = idx.normal_index * 3;
-                    vertex.normal = glm::vec3(attrib.normals[indexTemp], attrib.normals[indexTemp + 1],
-                                              attrib.normals[indexTemp + 2]);
+                    vertex.normal = glm::vec3(attrib.normals[indexTemp], -attrib.normals[indexTemp + 2],
+                                              attrib.normals[indexTemp + 1]);
                 }
 
                 if(idx.texcoord_index > -1)
