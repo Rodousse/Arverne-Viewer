@@ -1,5 +1,7 @@
 #include "renderer/Model.h"
 #include "renderer/VulkanCore.h"
+#include "renderer/tools/MemoryTools.h"
+#include "renderer/tools/VulkanTools.h"
 #include <algorithm>
 #include <cstring>
 #include <plog/Log.h>
@@ -107,8 +109,8 @@ void Model::createVertexBuffer(const data::Mesh& mesh, MeshData& meshData)
                                        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    pCore_->getUtils().createBuffer(bufferSize, usage, properties,
-                                    stagingBuffer, stagingBufferMemory);
+    tools::memory::createBuffer(*pCore_, bufferSize, usage, properties,
+                                stagingBuffer, stagingBufferMemory);
     void* pData;//Contains a pointer to the mapped memory
     //Documentation : memory must have been created with a memory type that reports VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
     //                  flags is reserved for future use of the vulkanAPI.
@@ -116,12 +118,12 @@ void Model::createVertexBuffer(const data::Mesh& mesh, MeshData& meshData)
                 &pData);
     memcpy(pData, meshes_[0].vertices.data(), (size_t)bufferSize);
     vkUnmapMemory(pCore_->getDevice(), stagingBufferMemory);
-    pCore_->getUtils().createBuffer(bufferSize,
-                                    VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, meshData.vertexBuffer,
-                                    meshData.vertexBufferMemory);
-    pCore_->getUtils().copyBuffer(stagingBuffer, meshData.vertexBuffer,
-                                  bufferSize);
+    tools::memory::createBuffer(*pCore_, bufferSize,
+                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, meshData.vertexBuffer,
+                                meshData.vertexBufferMemory);
+    tools::memory::copyBuffer(*pCore_, stagingBuffer, meshData.vertexBuffer,
+                              bufferSize);
     vkDestroyBuffer(pCore_->getDevice(), stagingBuffer, nullptr);
     vkFreeMemory(pCore_->getDevice(), stagingBufferMemory, nullptr);
     PLOGD << "Vertex Buffer Created for mesh : " << name_ << '\n';
@@ -138,19 +140,19 @@ void Model::createVertexIndexBuffer(const data::Mesh& mesh,
                                        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
-    pCore_->getUtils().createBuffer(bufferSize, usage, properties,
-                                    stagingBuffer, stagingBufferMemory);
+    tools::memory::createBuffer(*pCore_, bufferSize, usage, properties,
+                                stagingBuffer, stagingBufferMemory);
     void* pData;
     vkMapMemory(pCore_->getDevice(), stagingBufferMemory, 0, bufferSize, 0,
                 &pData);
     memcpy(pData, mesh.indices.data(), (size_t)bufferSize);
     vkUnmapMemory(pCore_->getDevice(), stagingBufferMemory);
-    pCore_->getUtils().createBuffer(bufferSize,
-                                    VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                                    VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, meshData.vertexIndexBuffer,
-                                    meshData.vertexIndexBufferMemory);
-    pCore_->getUtils().copyBuffer(stagingBuffer, meshData.vertexIndexBuffer,
-                                  bufferSize);
+    tools::memory::createBuffer(*pCore_, bufferSize,
+                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, meshData.vertexIndexBuffer,
+                                meshData.vertexIndexBufferMemory);
+    tools::memory::copyBuffer(*pCore_, stagingBuffer, meshData.vertexIndexBuffer,
+                              bufferSize);
     vkDestroyBuffer(pCore_->getDevice(), stagingBuffer, nullptr);
     vkFreeMemory(pCore_->getDevice(), stagingBufferMemory, nullptr);
     PLOGD << "Index Buffer Created for mesh : " << name_ << '\n';

@@ -1,5 +1,8 @@
 #include "renderer/texture/MaterialTexture.h"
 #include "renderer/VulkanCore.h"
+#include "renderer/tools/MemoryTools.h"
+#include "renderer/tools/VulkanTools.h"
+#include "renderer/tools/ImageTools.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -39,7 +42,7 @@ void MaterialTexture::generateMipmaps(VkImage image, VkFormat imageFormat, int32
         throw std::runtime_error("Texture Image format does not support linear blitting");
     }
 
-    VkCommandBuffer commandBuffer = pCore_->getUtils().beginSingleTimeCommands(false);
+    VkCommandBuffer commandBuffer = tools::vulkan::beginSingleTimeCommands(*pCore_);
 
     VkImageMemoryBarrier barrier = {};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -124,7 +127,7 @@ void MaterialTexture::generateMipmaps(VkImage image, VkFormat imageFormat, int32
                          0, nullptr,
                          1, &barrier);
 
-    pCore_->getUtils().endSingleTimeCommands(commandBuffer, false);
+    tools::vulkan::endSingleTimeCommands(*pCore_, commandBuffer);
 }
 
 
@@ -175,24 +178,25 @@ void MaterialTexture::createImage()
     VkBuffer stageBuffer;
     VkDeviceMemory stageBufferMemory;
 
-    pCore_->getUtils().createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stageBuffer,
-                                    stageBufferMemory);
+    tools::memory::createBuffer(*pCore_, imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stageBuffer,
+                                stageBufferMemory);
     void* pData;
     vkMapMemory(pCore_->getDevice(), stageBufferMemory, 0, imageSize, 0, &pData);
     memcpy(pData, pixels, imageSize);
     vkUnmapMemory(pCore_->getDevice(), stageBufferMemory);
 
-    pCore_->getUtils().createImage(static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight),
-                                   mipLevels_, VK_SAMPLE_COUNT_1_BIT, format_, VK_IMAGE_TILING_OPTIMAL,
-                                   VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
-                                   VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image_, imageMemory_);
-    pCore_->getUtils().transitionImageLayout(image_, format_, VK_IMAGE_LAYOUT_UNDEFINED,
-            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels_);
+    tools::image::createImage(*pCore_, static_cast<uint32_t>(texWidth),
+                              static_cast<uint32_t>(texHeight),
+                              mipLevels_, VK_SAMPLE_COUNT_1_BIT, format_, VK_IMAGE_TILING_OPTIMAL,
+                              VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+                              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image_, imageMemory_);
+    tools::image::transitionImageLayout(*pCore_, image_, format_, VK_IMAGE_LAYOUT_UNDEFINED,
+                                        VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels_);
     //Copy the content of a VkBuffer into a VkImage format
-    pCore_->getUtils().copyBufferToImage(stageBuffer, image_,
-                                         static_cast<uint32_t>(static_cast<uint32_t>(texWidth)),
-                                         static_cast<uint32_t>(static_cast<uint32_t>(texHeight)));
+    tools::image::copyBufferToImage(*pCore_, stageBuffer, image_,
+                                    static_cast<uint32_t>(static_cast<uint32_t>(texWidth)),
+                                    static_cast<uint32_t>(static_cast<uint32_t>(texHeight)));
     //Transition the layout for shader ability to read it
     //pCore_->getUtils().transitionImageLayout(image_, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1);
     generateMipmaps(image_, format_, texWidth, texHeight, mipLevels_);
@@ -205,7 +209,7 @@ void MaterialTexture::createImage()
 
 void MaterialTexture::createImageView()
 {
-    imageView_ = pCore_->getUtils().createImageView(format_, image_, VK_IMAGE_ASPECT_COLOR_BIT,
+    imageView_ = tools::image::createImageView(*pCore_, format_, image_, VK_IMAGE_ASPECT_COLOR_BIT,
                  mipLevels_);
 }
 

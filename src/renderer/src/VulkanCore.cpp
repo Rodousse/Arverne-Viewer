@@ -1,4 +1,7 @@
 #include "renderer/VulkanCore.h"
+#include "renderer/tools/ImageTools.h"
+#include "renderer/tools/MemoryTools.h"
+#include "renderer/tools/VulkanTools.h"
 #include <algorithm>
 #include <set>
 #include <array>
@@ -14,7 +17,6 @@ namespace renderer
 VulkanCore::VulkanCore():
     debugMessenger_(this, &instance_),
     swapchain_(this),
-    utilities_(this),
     lenaTexture_(this, std::string(RESOURCE_PATH) + "/textures/default.bmp", VK_FORMAT_R8G8B8A8_UNORM),
     model_(this)
 {
@@ -204,11 +206,6 @@ const VkCommandPool& VulkanCore::getCommandPoolTransfer() const
 const VkCommandPool& VulkanCore::getCommandPool() const
 {
     return commandPool_;
-}
-
-const VulkanUtils& VulkanCore::getUtils() const
-{
-    return utilities_;
 }
 
 void VulkanCore::createInstance()
@@ -730,29 +727,31 @@ void VulkanCore::createCommandPool()
 void VulkanCore::createDepthRessources()
 {
     VkFormat depthFormat = findDepthFormat();
-    utilities_.createImage(swapchain_.getExtent().width, swapchain_.getExtent().height, 1, msaaSamples_,
-                           depthFormat, VK_IMAGE_TILING_OPTIMAL,
-                           VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage_,
-                           depthImageMemory_);
+    tools::image::createImage(*this, swapchain_.getExtent().width, swapchain_.getExtent().height, 1,
+                              msaaSamples_,
+                              depthFormat, VK_IMAGE_TILING_OPTIMAL,
+                              VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage_,
+                              depthImageMemory_);
 
-    depthImageView_ = utilities_.createImageView(depthFormat, depthImage_, VK_IMAGE_ASPECT_DEPTH_BIT,
-                      1);
+    depthImageView_ = tools::image::createImageView(*this, depthFormat, depthImage_,
+                      VK_IMAGE_ASPECT_DEPTH_BIT, 1);
 
-    utilities_.transitionImageLayout(depthImage_, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED,
-                                     VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
+    tools::image::transitionImageLayout(*this, depthImage_, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED,
+                                        VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, 1);
 }
 
 void VulkanCore::createColorRessources()
 {
     VkFormat format = swapchain_.getFormat().format;
 
-    utilities_.createImage(swapchain_.getExtent().width, swapchain_.getExtent().height, 1,
-                           msaaSamples_, format, VK_IMAGE_TILING_OPTIMAL,
-                           VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
-                           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorImage_, colorMemory_);
-    colorImageView_ = utilities_.createImageView(format, colorImage_, VK_IMAGE_ASPECT_COLOR_BIT, 1);
-    utilities_.transitionImageLayout(colorImage_, format, VK_IMAGE_LAYOUT_UNDEFINED,
-                                     VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
+    tools::image::createImage(*this, swapchain_.getExtent().width, swapchain_.getExtent().height, 1,
+                              msaaSamples_, format, VK_IMAGE_TILING_OPTIMAL,
+                              VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+                              VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorImage_, colorMemory_);
+    colorImageView_ = tools::image::createImageView(*this, format, colorImage_,
+                      VK_IMAGE_ASPECT_COLOR_BIT, 1);
+    tools::image::transitionImageLayout(*this, colorImage_, format, VK_IMAGE_LAYOUT_UNDEFINED,
+                                        VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, 1);
 }
 
 void VulkanCore::recreateCommandBuffer()
@@ -773,7 +772,8 @@ void VulkanCore::createVertexBuffer()
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
 
-    utilities_.createBuffer(bufferSize, usage, properties, stagingBuffer, stagingBufferMemory);
+    tools::memory::createBuffer(*this, bufferSize, usage, properties, stagingBuffer,
+                                stagingBufferMemory);
 
     void* pData;//Contains a pointer to the mapped memory
 
@@ -783,10 +783,10 @@ void VulkanCore::createVertexBuffer()
     memcpy(pData, meshes_[0].vertices.data(), (size_t)bufferSize);
     vkUnmapMemory(logicalDevice_, stagingBufferMemory);
 
-    utilities_.createBuffer(bufferSize,
-                            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer_, vertexBufferMemory_);
-    utilities_.copyBuffer(stagingBuffer, vertexBuffer_, bufferSize);
+    tools::memory::createBuffer(*this, bufferSize,
+                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer_, vertexBufferMemory_);
+    tools::memory::copyBuffer(*this, stagingBuffer, vertexBuffer_, bufferSize);
 
     vkDestroyBuffer(logicalDevice_, stagingBuffer, nullptr);
     vkFreeMemory(logicalDevice_, stagingBufferMemory, nullptr);
@@ -804,7 +804,8 @@ void VulkanCore::createVertexIndexBuffer()
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
 
-    utilities_.createBuffer(bufferSize, usage, properties, stagingBuffer, stagingBufferMemory);
+    tools::memory::createBuffer(*this, bufferSize, usage, properties, stagingBuffer,
+                                stagingBufferMemory);
 
     void* pData;//Contains a pointer to the mapped memory
 
@@ -814,10 +815,10 @@ void VulkanCore::createVertexIndexBuffer()
     memcpy(pData, meshes_[0].indices.data(), (size_t)bufferSize);
     vkUnmapMemory(logicalDevice_, stagingBufferMemory);
 
-    utilities_.createBuffer(bufferSize,
-                            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexIndexBuffer_, vertexIndexBufferMemory_);
-    utilities_.copyBuffer(stagingBuffer, vertexIndexBuffer_, bufferSize);
+    tools::memory::createBuffer(*this, bufferSize,
+                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexIndexBuffer_, vertexIndexBufferMemory_);
+    tools::memory::copyBuffer(*this, stagingBuffer, vertexIndexBuffer_, bufferSize);
 
     vkDestroyBuffer(logicalDevice_, stagingBuffer, nullptr);
     vkFreeMemory(logicalDevice_, stagingBufferMemory, nullptr);
@@ -834,9 +835,9 @@ void VulkanCore::createUniformBuffer()
 
     for(size_t i = 0; i < swapchain_.getImageViews().size(); i++)
     {
-        utilities_.createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                                uniformBuffers_[i], uniformBuffersMemory_[i]);
+        tools::memory::createBuffer(*this, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                                    VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                    uniformBuffers_[i], uniformBuffersMemory_[i]);
     }
 
     PLOGD << "Uniform Buffer Created" << '\n';
