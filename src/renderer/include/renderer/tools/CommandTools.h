@@ -18,7 +18,7 @@ namespace renderer
 namespace tools
 {
 
-namespace vulkan
+namespace command
 {
 
 VkCommandBuffer beginSingleTimeCommands(const VulkanCore& core);

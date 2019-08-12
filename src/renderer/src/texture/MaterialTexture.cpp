@@ -1,7 +1,7 @@
 #include "renderer/texture/MaterialTexture.h"
 #include "renderer/VulkanCore.h"
 #include "renderer/tools/MemoryTools.h"
-#include "renderer/tools/VulkanTools.h"
+#include "renderer/tools/CommandTools.h"
 #include "renderer/tools/ImageTools.h"
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -42,7 +42,7 @@ void MaterialTexture::generateMipmaps(VkImage image, VkFormat imageFormat, int32
         throw std::runtime_error("Texture Image format does not support linear blitting");
     }
 
-    VkCommandBuffer commandBuffer = tools::vulkan::beginSingleTimeCommands(*pCore_);
+    VkCommandBuffer commandBuffer = tools::command::beginSingleTimeCommands(*pCore_);
 
     VkImageMemoryBarrier barrier = {};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -127,7 +127,7 @@ void MaterialTexture::generateMipmaps(VkImage image, VkFormat imageFormat, int32
                          0, nullptr,
                          1, &barrier);
 
-    tools::vulkan::endSingleTimeCommands(*pCore_, commandBuffer);
+    tools::command::endSingleTimeCommands(*pCore_, commandBuffer);
 }
 
 

@@ -1,6 +1,6 @@
 #include "renderer/tools/ImageTools.h"
 #include "renderer/tools/MemoryTools.h"
-#include "renderer/tools/VulkanTools.h"
+#include "renderer/tools/CommandTools.h"
 
 namespace renderer
 {
@@ -86,7 +86,7 @@ void transitionImageLayout(const VulkanCore& core, VkImage image, VkFormat forma
                            VkImageLayout newLayout, uint32_t mipLevels)
 {
     QueueFamilyIndices indices = core.getPhysicalDeviceProperties().getQueueFamilyIndices();
-    VkCommandBuffer commandBuffer = tools::vulkan::beginSingleTimeTransferCommands(core);
+    VkCommandBuffer commandBuffer = tools::command::beginSingleTimeTransferCommands(core);
 
     VkPipelineStageFlags sourceStage;
     VkPipelineStageFlags destinationStage;
@@ -186,13 +186,13 @@ void transitionImageLayout(const VulkanCore& core, VkImage image, VkFormat forma
                          0, nullptr,
                          1, &barrier);
 
-    tools::vulkan::endSingleTimeTransferCommands(core, commandBuffer);
+    tools::command::endSingleTimeTransferCommands(core, commandBuffer);
 }
 
 void copyBufferToImage(const VulkanCore& core, VkBuffer buffer, VkImage image, uint32_t width,
                        uint32_t height)
 {
-    VkCommandBuffer commandBuffer = tools::vulkan::beginSingleTimeTransferCommands(core);
+    VkCommandBuffer commandBuffer = tools::command::beginSingleTimeTransferCommands(core);
     VkBufferImageCopy region = {};
     region.bufferOffset = 0;
     region.bufferImageHeight = 0;
@@ -207,7 +207,7 @@ void copyBufferToImage(const VulkanCore& core, VkBuffer buffer, VkImage image, u
     vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1,
                            &region);
 
-    tools::vulkan::endSingleTimeTransferCommands(core, commandBuffer);
+    tools::command::endSingleTimeTransferCommands(core, commandBuffer);
 }
 
 bool hasStencilComponent(VkFormat format)

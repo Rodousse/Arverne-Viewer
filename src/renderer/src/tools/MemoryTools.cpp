@@ -1,5 +1,5 @@
 #include "renderer/tools/MemoryTools.h"
-#include "renderer/tools/VulkanTools.h"
+#include "renderer/tools/CommandTools.h"
 
 namespace renderer
 {
@@ -62,7 +62,7 @@ void createBuffer(const VulkanCore& core, VkDeviceSize size, VkBufferUsageFlags 
 
 void copyBuffer(const VulkanCore& core, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
-    VkCommandBuffer commandBuffer = tools::vulkan::beginSingleTimeTransferCommands(core);
+    VkCommandBuffer commandBuffer = tools::command::beginSingleTimeTransferCommands(core);
 
     VkBufferCopy copyRegion = {};
     copyRegion.srcOffset = 0;
@@ -71,7 +71,7 @@ void copyBuffer(const VulkanCore& core, VkBuffer srcBuffer, VkBuffer dstBuffer, 
 
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
-    tools::vulkan::endSingleTimeTransferCommands(core, commandBuffer);
+    tools::command::endSingleTimeTransferCommands(core, commandBuffer);
 }
 
 /*@brief : Check if the memory type of a device match the requirements in properties

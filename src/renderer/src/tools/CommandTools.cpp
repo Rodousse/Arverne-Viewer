@@ -1,4 +1,4 @@
-#include "renderer/tools/VulkanTools.h"
+#include "renderer/tools/CommandTools.h"
 #include "renderer/tools/MemoryTools.h"
 
 namespace
@@ -55,7 +55,7 @@ namespace renderer
 namespace tools
 {
 
-namespace vulkan
+namespace command
 {
 
 VkCommandBuffer beginSingleTimeCommands(const VulkanCore& core)

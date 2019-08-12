@@ -5,9 +5,9 @@ set(HEADERS
     include/renderer/camera/Camera.h
     include/renderer/texture/MaterialTexture.h
     include/renderer/texture/Texture2D.h
+    include/renderer/tools/CommandTools.h
     include/renderer/tools/ImageTools.h
     include/renderer/tools/MemoryTools.h
-    include/renderer/tools/VulkanTools.h
     include/renderer/DebugMessenger.h
     include/renderer/Material.h
     include/renderer/Model.h
@@ -25,9 +25,9 @@ set(SOURCES
     src/camera/Camera.cpp
     src/texture/MaterialTexture.cpp
     src/texture/Texture2D.cpp
+    src/tools/CommandTools.cpp
     src/tools/ImageTools.cpp
     src/tools/MemoryTools.cpp
-    src/tools/VulkanTools.cpp
     src/DebugMessenger.cpp
     src/Material.cpp
     src/Model.cpp
