@@ -124,10 +124,6 @@ bool ObjLoader::load(const std::string& path, std::vector<data::Mesh>& scene)
                         vertex.texCoord = glm::vec2(attrib.texcoords[indexTemp], attrib.texcoords[indexTemp + 1]);
                     }
 
-                    //TODO : If vertex not already in vertices
-                    //add vertex to vertices
-                    //else
-                    //add an index to ebo
                     newMsh.vertices.push_back(vertex);
                     attributeIndices[idx] = indexVertex;
                     indexVertex++;
