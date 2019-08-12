@@ -1,5 +1,6 @@
 #include "loader/ObjLoader.h"
 #include <algorithm>
+#include <unordered_map>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <plog/Log.h>
@@ -17,6 +18,35 @@ ObjLoader::~ObjLoader()
 {
 
 }
+template <class Hasher, class Hashed>
+inline void hash_combine(std::size_t& seed, const Hashed& v)
+{
+    Hasher hasher;
+    seed ^= hasher(v) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+}
+
+struct VertexIndicesHasher
+{
+    size_t operator()(const tinyobj::index_t& hashed)const
+    {
+        size_t seed = 0xab12f56c;
+        hash_combine<std::hash<int>, int>(seed, hashed.vertex_index);
+        hash_combine<std::hash<int>, int>(seed, hashed.normal_index);
+        hash_combine<std::hash<int>, int>(seed, hashed.texcoord_index);
+        return seed;
+    }
+};
+
+struct VertexIndicesEquals
+{
+    bool operator()(const tinyobj::index_t& a, const tinyobj::index_t& b)const
+    {
+        return a.vertex_index == b.vertex_index && a.normal_index == b.normal_index
+               && a.texcoord_index == b.texcoord_index;
+    }
+};
+
+
 
 tinyobj::index_t findMinIndexes(const tinyobj::shape_t& shape);
 tinyobj::index_t findMaxIndexes(const tinyobj::shape_t& shape);
@@ -52,6 +82,8 @@ bool ObjLoader::load(const std::string& path, std::vector<data::Mesh>& scene)
         size_t index_offset = 0;
 
         uint32_t indexVertex = 0;
+        std::unordered_map<tinyobj::index_t, uint32_t, VertexIndicesHasher, VertexIndicesEquals>
+        attributeIndices;
 
         newMsh.name = shape.name;
 
@@ -64,38 +96,44 @@ bool ObjLoader::load(const std::string& path, std::vector<data::Mesh>& scene)
             for(int v = 0; v < fv; v++)
             {
                 tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
-                size_t indexTemp;
-                data::VertexAttribute vertex;
-                memset(&vertex, 0, sizeof(data::VertexAttribute));
 
-                if(idx.vertex_index > -1)
+                if(attributeIndices.count(idx) == 0)
                 {
-                    indexTemp = idx.vertex_index * 3;
-                    vertex.pos = glm::vec3(attrib.vertices[indexTemp], -attrib.vertices[indexTemp + 2],
-                                           attrib.vertices[indexTemp + 1]);
+
+                    size_t indexTemp;
+                    data::VertexAttribute vertex;
+                    memset(&vertex, 0, sizeof(data::VertexAttribute));
+
+                    if(idx.vertex_index > -1)
+                    {
+                        indexTemp = idx.vertex_index * 3;
+                        vertex.pos = glm::vec3(attrib.vertices[indexTemp], -attrib.vertices[indexTemp + 2],
+                                               attrib.vertices[indexTemp + 1]);
+                    }
+
+                    if(idx.normal_index > -1)
+                    {
+                        indexTemp = idx.normal_index * 3;
+                        vertex.normal = glm::vec3(attrib.normals[indexTemp], -attrib.normals[indexTemp + 2],
+                                                  attrib.normals[indexTemp + 1]);
+                    }
+
+                    if(idx.texcoord_index > -1)
+                    {
+                        indexTemp = idx.texcoord_index * 2;
+                        vertex.texCoord = glm::vec2(attrib.texcoords[indexTemp], attrib.texcoords[indexTemp + 1]);
+                    }
+
+                    //TODO : If vertex not already in vertices
+                    //add vertex to vertices
+                    //else
+                    //add an index to ebo
+                    newMsh.vertices.push_back(vertex);
+                    attributeIndices[idx] = indexVertex;
+                    indexVertex++;
                 }
 
-                if(idx.normal_index > -1)
-                {
-                    indexTemp = idx.normal_index * 3;
-                    vertex.normal = glm::vec3(attrib.normals[indexTemp], -attrib.normals[indexTemp + 2],
-                                              attrib.normals[indexTemp + 1]);
-                }
-
-                if(idx.texcoord_index > -1)
-                {
-                    indexTemp = idx.texcoord_index * 2;
-                    vertex.texCoord = glm::vec2(attrib.texcoords[indexTemp], attrib.texcoords[indexTemp + 1]);
-                }
-
-                //TODO : If vertex not already in vertices
-                //add vertex to vertices
-                //else
-                //add an index to ebo
-
-                newMsh.vertices.push_back(vertex);
-                newMsh.indices.push_back(indexVertex);
-                indexVertex++;
+                newMsh.indices.push_back(attributeIndices[idx]);
             }
 
             index_offset += fv;
