@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <glm/geometric.hpp>
 #include <plog/Log.h>
 
 #define TINYOBJLOADER_IMPLEMENTATION
@@ -92,10 +93,30 @@ bool ObjLoader::load(const std::string& path, std::vector<data::Mesh>& scene)
         for(size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++)
         {
             int fv = shape.mesh.num_face_vertices[f];
+            //We create a normal for the face in case the normal is not present
+            tinyobj::index_t& aIdx = shape.mesh.indices[index_offset];
+            glm::vec3 faceNormal;
+
+            if(aIdx.normal_index == -1)
+            {
+                tinyobj::index_t& bIdx = shape.mesh.indices[index_offset + 1];
+                tinyobj::index_t& cIdx = shape.mesh.indices[index_offset + 2];
+                glm::vec3 a = glm::vec3(attrib.vertices[aIdx.vertex_index * 3],
+                                        -attrib.vertices[aIdx.vertex_index * 3 + 2],
+                                        attrib.vertices[aIdx.vertex_index * 3 + 1]);
+                glm::vec3 b = glm::vec3(attrib.vertices[bIdx.vertex_index * 3],
+                                        -attrib.vertices[bIdx.vertex_index * 3 + 2],
+                                        attrib.vertices[bIdx.vertex_index * 3 + 1]);
+                glm::vec3 c = glm::vec3(attrib.vertices[cIdx.vertex_index * 3],
+                                        -attrib.vertices[cIdx.vertex_index * 3 + 2],
+                                        attrib.vertices[cIdx.vertex_index * 3 + 1]);
+                faceNormal = glm::cross((b - a), (c - a));
+            }
+
 
             for(int v = 0; v < fv; v++)
             {
-                tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
+                const tinyobj::index_t& idx = shape.mesh.indices[index_offset + v];
 
                 if(attributeIndices.count(idx) == 0)
                 {
@@ -109,19 +130,23 @@ bool ObjLoader::load(const std::string& path, std::vector<data::Mesh>& scene)
                         indexTemp = idx.vertex_index * 3;
                         vertex.pos = glm::vec3(attrib.vertices[indexTemp], -attrib.vertices[indexTemp + 2],
                                                attrib.vertices[indexTemp + 1]);
-                    }
 
-                    if(idx.normal_index > -1)
-                    {
-                        indexTemp = idx.normal_index * 3;
-                        vertex.normal = glm::vec3(attrib.normals[indexTemp], -attrib.normals[indexTemp + 2],
-                                                  attrib.normals[indexTemp + 1]);
-                    }
+                        if(idx.normal_index > -1)
+                        {
+                            indexTemp = idx.normal_index * 3;
+                            vertex.normal = glm::vec3(attrib.normals[indexTemp], -attrib.normals[indexTemp + 2],
+                                                      attrib.normals[indexTemp + 1]);
+                        }
+                        else
+                        {
+                            vertex.normal = faceNormal;
+                        }
 
-                    if(idx.texcoord_index > -1)
-                    {
-                        indexTemp = idx.texcoord_index * 2;
-                        vertex.texCoord = glm::vec2(attrib.texcoords[indexTemp], attrib.texcoords[indexTemp + 1]);
+                        if(idx.texcoord_index > -1)
+                        {
+                            indexTemp = idx.texcoord_index * 2;
+                            vertex.texCoord = glm::vec2(attrib.texcoords[indexTemp], attrib.texcoords[indexTemp + 1]);
+                        }
                     }
 
                     newMsh.vertices.push_back(vertex);
