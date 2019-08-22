@@ -15,7 +15,6 @@
 #include "renderer/DebugMessenger.h"
 #include "renderer/PhysicalDeviceProvider.h"
 #include "renderer/Swapchain.h"
-#include "renderer/VulkanUtils.h"
 #include "renderer/Vertex.h"
 #include "renderer/texture/MaterialTexture.h"
 #include "renderer/camera/Camera.h"
@@ -63,7 +62,6 @@ protected :
     VkDevice logicalDevice_;
 
     DebugMessenger debugMessenger_;
-    VulkanUtils utilities_;
 
     VkSurfaceKHR surface_;
 
@@ -183,8 +181,6 @@ public:
 
     const VkCommandPool& getCommandPoolTransfer()const;
     const VkCommandPool& getCommandPool()const;
-
-    const VulkanUtils& getUtils()const;
 
     /******************************************* APPLICATION FUNCTIONS ******************************************************/
 

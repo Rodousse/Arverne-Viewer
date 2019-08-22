@@ -1,5 +1,6 @@
 #include "renderer/Swapchain.h"
 #include "renderer/VulkanCore.h"
+#include "renderer/tools/ImageTools.h"
 #include <algorithm>
 
 namespace renderer
@@ -184,7 +185,7 @@ void Swapchain::createImageViews()
     //Configure image view for every image in the swapchain
     for(size_t i = 0; i < images_.size(); i++)
     {
-        imageViews_[i] = pCore_->getUtils().createImageView(format_.format, images_[i],
+        imageViews_[i] = tools::image::createImageView(*pCore_, format_.format, images_[i],
                          VK_IMAGE_ASPECT_COLOR_BIT, 1);
     }
 
