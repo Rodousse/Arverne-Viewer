@@ -3,8 +3,8 @@
 #include "renderer/tools/MemoryTools.h"
 #include "renderer/tools/CommandTools.h"
 #include "renderer/tools/ImageTools.h"
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+#include "loader/ImageLoader.hpp"
+
 
 namespace renderer
 {
@@ -162,18 +162,18 @@ void MaterialTexture::createSampler()
 
 void MaterialTexture::createImage()
 {
+    auto texture = loader::loadImage<unsigned char>(path_, data::ImageFormat::RGBA8);
+    VkDeviceSize imageSize = texture.width() * texture.height() * 4;
+    mipLevels_ = static_cast<uint32_t>(std::floor(std::log2(std::max(texture.width(),
+                                       texture.height())))) + 1;
 
-    int texWidth, texHeight, texChannels;
-    stbi_uc* pixels = stbi_load(path_.data(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-    VkDeviceSize imageSize = texWidth * texHeight * 4;
-    mipLevels_ = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
-
-    if(!pixels)
+    if(!texture.data())
     {
         throw std::runtime_error("failed to load texture image!");
     }
 
-    mipLevels_ = static_cast<uint32_t>(std::floor(std::log2(std::max(texWidth, texHeight)))) + 1;
+    mipLevels_ = static_cast<uint32_t>(std::floor(std::log2(std::max(texture.width(),
+                                       texture.height())))) + 1;
 
     VkBuffer stageBuffer;
     VkDeviceMemory stageBufferMemory;
@@ -183,11 +183,11 @@ void MaterialTexture::createImage()
                                 stageBufferMemory);
     void* pData;
     vkMapMemory(pCore_->getDevice(), stageBufferMemory, 0, imageSize, 0, &pData);
-    memcpy(pData, pixels, imageSize);
+    memcpy(pData, texture.data(), imageSize);
     vkUnmapMemory(pCore_->getDevice(), stageBufferMemory);
 
-    tools::image::createImage(*pCore_, static_cast<uint32_t>(texWidth),
-                              static_cast<uint32_t>(texHeight),
+    tools::image::createImage(*pCore_, static_cast<uint32_t>(texture.width()),
+                              static_cast<uint32_t>(texture.height()),
                               mipLevels_, VK_SAMPLE_COUNT_1_BIT, format_, VK_IMAGE_TILING_OPTIMAL,
                               VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
                               VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, image_, imageMemory_);
@@ -195,15 +195,14 @@ void MaterialTexture::createImage()
                                         VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels_);
     //Copy the content of a VkBuffer into a VkImage format
     tools::image::copyBufferToImage(*pCore_, stageBuffer, image_,
-                                    static_cast<uint32_t>(static_cast<uint32_t>(texWidth)),
-                                    static_cast<uint32_t>(static_cast<uint32_t>(texHeight)));
+                                    static_cast<uint32_t>(static_cast<uint32_t>(texture.width())),
+                                    static_cast<uint32_t>(static_cast<uint32_t>(texture.height())));
     //Transition the layout for shader ability to read it
     //pCore_->getUtils().transitionImageLayout(image_, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, 1);
-    generateMipmaps(image_, format_, texWidth, texHeight, mipLevels_);
+    generateMipmaps(image_, format_, texture.width(), texture.height(), mipLevels_);
 
     vkDestroyBuffer(pCore_->getDevice(), stageBuffer, nullptr);
     vkFreeMemory(pCore_->getDevice(), stageBufferMemory, nullptr);
-    stbi_image_free(pixels);
 }
 
 

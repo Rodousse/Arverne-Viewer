@@ -1,6 +1,6 @@
 #pragma once
 
-#include "loader/Loader.h"
+#include "../../src/Loader.h"
 
 class ObjLoader : public Loader
 {
