@@ -162,7 +162,7 @@ void MaterialTexture::createSampler()
 
 void MaterialTexture::createImage()
 {
-    auto texture = loader::loadImage<unsigned char>(path_, data::ImageFormat::RGBA8);
+    auto texture = loader::loadImage<data::ImageFormat::RGBA8>(path_);
     VkDeviceSize imageSize = texture.width() * texture.height() * 4;
     mipLevels_ = static_cast<uint32_t>(std::floor(std::log2(std::max(texture.width(),
                                        texture.height())))) + 1;

@@ -9,7 +9,7 @@ namespace data
 {
 
 
-enum ImageFormat
+enum class ImageFormat
 {
     //Luminance
     LUM8,
@@ -38,7 +38,7 @@ class Image
     ImageFormat format_;
 
 public:
-    Image(PixelType* data, int width, int height, ImageFormat format):
+    Image(PixelType* data, const int& width, const int& height, const ImageFormat& format):
         data_(data),
         width_(width),
         height_(height),
@@ -69,22 +69,22 @@ public:
         }
     }
 
-    const PixelType* data()
+    const PixelType* data() const
     {
         return data_;
     }
 
-    ImageFormat format()
+    const ImageFormat& format() const
     {
         return format_;
     }
 
-    int height()
+    const int& height() const
     {
         return height_;
     }
 
-    int width()
+    const int& width() const
     {
         return width_;
     }
@@ -92,7 +92,7 @@ public:
 };
 
 
-bool is16Bits(data::ImageFormat format)
+constexpr bool is16Bits(const ImageFormat& format)
 {
     if(format == data::ImageFormat::LUM16
        || format == data::ImageFormat::LUMA16
@@ -104,7 +104,7 @@ bool is16Bits(data::ImageFormat format)
     return false;
 }
 
-bool is8Bits(data::ImageFormat format)
+constexpr bool is8Bits(const data::ImageFormat& format)
 {
     if(format == data::ImageFormat::LUM8
        || format == data::ImageFormat::LUMA8
@@ -116,7 +116,7 @@ bool is8Bits(data::ImageFormat format)
     return false;
 }
 
-bool is32Bits(data::ImageFormat format)
+bool is32Bits(const data::ImageFormat& format)
 {
     if(format == data::ImageFormat::LUM32
        || format == data::ImageFormat::LUMA32

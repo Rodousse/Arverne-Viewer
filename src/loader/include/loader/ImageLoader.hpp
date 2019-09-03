@@ -11,7 +11,7 @@
 namespace
 {
 
-int deduceSTBIType(data::ImageFormat format)
+constexpr int deduceSTBIType(const data::ImageFormat& format)
 {
     using data::ImageFormat;
 
@@ -41,19 +41,11 @@ int deduceSTBIType(data::ImageFormat format)
 }
 
 
-
-}
-
-
-namespace loader
-{
-
-
 template <typename PixelType>
-data::Image<PixelType> loadImage(const std::string& path, data::ImageFormat format);
+data::Image<PixelType> loadImage(const std::string& path, const data::ImageFormat& format);
 
 template <>
-data::Image<float> loadImage<float>(const std::string& path, data::ImageFormat format)
+data::Image<float> loadImage<float>(const std::string& path, const data::ImageFormat& format)
 {
     int width;
     int height;
@@ -67,7 +59,7 @@ data::Image<float> loadImage<float>(const std::string& path, data::ImageFormat f
 
 template <>
 data::Image<unsigned char> loadImage<unsigned char>(const std::string& path,
-        data::ImageFormat format)
+        const data::ImageFormat& format)
 {
     int width;
     int height;
@@ -81,7 +73,7 @@ data::Image<unsigned char> loadImage<unsigned char>(const std::string& path,
 
 template <>
 data::Image<unsigned short> loadImage<unsigned short>(const std::string& path,
-        data::ImageFormat format)
+        const data::ImageFormat& format)
 {
     int width;
     int height;
@@ -91,6 +83,99 @@ data::Image<unsigned short> loadImage<unsigned short>(const std::string& path,
 
     data::Image<unsigned short> image(data, width, height, format);
     return std::move(image);
+}
+
+
+
+template <data::ImageFormat pixelFormat>
+struct PixelTypeTrait
+{
+    typedef void type;
+};
+
+template <>
+struct PixelTypeTrait<data::ImageFormat::LUM8>
+{
+    typedef unsigned char type;
+};
+
+template <>
+struct PixelTypeTrait<data::ImageFormat::LUMA8>
+{
+    typedef unsigned char type;
+};
+
+template <>
+struct PixelTypeTrait<data::ImageFormat::RGB8>
+{
+    typedef unsigned char type;
+};
+
+template <>
+struct PixelTypeTrait<data::ImageFormat::RGBA8>
+{
+    typedef unsigned char type;
+};
+
+template <>
+struct PixelTypeTrait<data::ImageFormat::LUM16>
+{
+    typedef unsigned short type;
+};
+
+template <>
+struct PixelTypeTrait<data::ImageFormat::LUMA16>
+{
+    typedef unsigned short type;
+};
+
+template <>
+struct PixelTypeTrait<data::ImageFormat::RGB16>
+{
+    typedef unsigned short type;
+};
+
+template <>
+struct PixelTypeTrait<data::ImageFormat::RGBA16>
+{
+    typedef unsigned short type;
+};
+
+template <>
+struct PixelTypeTrait<data::ImageFormat::LUM32>
+{
+    typedef float type;
+};
+
+template <>
+struct PixelTypeTrait<data::ImageFormat::LUMA32>
+{
+    typedef float type;
+};
+
+template <>
+struct PixelTypeTrait<data::ImageFormat::RGB32>
+{
+    typedef float type;
+};
+
+template <>
+struct PixelTypeTrait<data::ImageFormat::RGBA32>
+{
+    typedef float type;
+};
+
+
+}
+
+
+namespace loader
+{
+
+template <data::ImageFormat pixelFormat>
+data::Image<typename ::PixelTypeTrait<pixelFormat>::type> loadImage(const std::string& path)
+{
+    return ::loadImage<typename ::PixelTypeTrait<pixelFormat>::type>(path, pixelFormat);
 }
 
 }
