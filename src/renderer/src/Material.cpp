@@ -2,27 +2,27 @@
 namespace renderer
 {
 
-Material::Material(const VulkanCore* pCore):
-    VkElement(pCore),
-    albedo(pCore)
-{
+//Material::Material(const VulkanCore* pCore):
+//    VkElement(pCore),
+//    albedo(pCore)
+//{
 
-}
+//}
 
-void Material::create()
-{
-    isCreated_ = true;
-}
+//void Material::create()
+//{
+//    isCreated_ = true;
+//}
 
-void Material::destroy()
-{
-    isCreated_ = false;
-}
+//void Material::destroy()
+//{
+//    isCreated_ = false;
+//}
 
-Material::~Material()
-{
+//Material::~Material()
+//{
 
-}
+//}
 
 
 }

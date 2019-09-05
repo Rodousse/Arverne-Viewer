@@ -1,6 +1,7 @@
 #pragma once
 
-#include "renderer/VkElement.h"
+#include "renderer/VulkanCore.h"
+#include "data/2D/Image.hpp"
 
 namespace renderer
 {
@@ -31,6 +32,11 @@ bool hasStencilComponent(VkFormat format) ;
 
 VkSampleCountFlagBits getMaxUsableSampleCount(const VkPhysicalDeviceProperties&
         physicalDeviceProperties);
+
+
+VkFormat mapDataImageFormatToVkFormat(const data::ImageFormat& format);
+
+data::ImageFormat mapVkFormatToDataImageFormat(const VkFormat& format);
 
 }
 

@@ -1,8 +1,6 @@
 #pragma once
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-#endif
+
+#include "../../../src/2D/stbimplementation.h"
 #include <memory>
 
 namespace data
@@ -26,7 +24,9 @@ enum class ImageFormat
     //4 Components per pixel
     RGBA8,
     RGBA16,
-    RGBA32// Float RGBA
+    RGBA32,// Float RGBA
+
+    UNDEFINED = -1
 };
 
 template <typename PixelType>
@@ -92,7 +92,7 @@ public:
 };
 
 
-constexpr bool is16Bits(const ImageFormat& format)
+inline bool is16Bits(const ImageFormat& format)
 {
     if(format == data::ImageFormat::LUM16
        || format == data::ImageFormat::LUMA16
@@ -104,7 +104,7 @@ constexpr bool is16Bits(const ImageFormat& format)
     return false;
 }
 
-constexpr bool is8Bits(const data::ImageFormat& format)
+inline bool is8Bits(const data::ImageFormat& format)
 {
     if(format == data::ImageFormat::LUM8
        || format == data::ImageFormat::LUMA8
@@ -116,7 +116,7 @@ constexpr bool is8Bits(const data::ImageFormat& format)
     return false;
 }
 
-bool is32Bits(const data::ImageFormat& format)
+inline bool is32Bits(const data::ImageFormat& format)
 {
     if(format == data::ImageFormat::LUM32
        || format == data::ImageFormat::LUMA32

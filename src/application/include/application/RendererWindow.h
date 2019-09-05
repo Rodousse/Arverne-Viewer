@@ -1,22 +1,20 @@
 #pragma once
 
 #include "renderer/VulkanApplication.h"
-#include <QVulkanWindowRenderer>
+#include <QVulkanInstance>
 #include <QResizeEvent>
 #include <QWindow>
 #include "renderer/camera/ArcBallCamera.h"
-#include "application/ModelManager.h"
 
 #define WIDTH_WINDOW 800
 #define HEIGHT_WINDOW 600
 
 
-class RendererWindow: public QWindow, public renderer::VulkanApplication
+class RendererWindow: public QWindow
 {
     Q_OBJECT
 private:
-    QVulkanWindow* window_;
-    bool windowResized_ = false;
+    renderer::VulkanApplication renderer_;
     bool initialized_ = false;
     bool isFullscreen = false;
 
@@ -26,20 +24,10 @@ private:
     Qt::MouseButton mouseButtonPressed_ = Qt::NoButton;
     QPoint mouseLastPosition_;
     renderer::ArcBallCamera camera_;
-    ModelManager modelManager_;
-
-    // --------------------------- VULKANAPPLICATION VIRTUAL
-    void initCore() override;
-    void initWindow()override;
-    void createSurface()override;
-    void resizeWindow(int width, int height)override;
-    void drawFrame()override;
-    void mainLoop()override {}
-    void run()override {}
-    //--------------------------------------------
 
     // --------------------------- QWINDOW VIRTUAL
     void resizeEvent(QResizeEvent* e) override;
+    void exposeEvent(QExposeEvent*) override;
     //--------------------------------------------
 
     void processWheelEvent(const QWheelEvent* e);
@@ -49,18 +37,16 @@ private:
 
 public:
     RendererWindow();
-    ~RendererWindow() override;
+    virtual ~RendererWindow() = default;
 
     // --------------------------- QWINDOW VIRTUAL
-    void exposeEvent(QExposeEvent*) override;
     bool event(QEvent* e) override;
     //--------------------------------------------
 
-    ModelManager& getModelManager();
-    const ModelManager& getModelManager()const;
     void resetCamera();
-    void initInstance(QVulkanInstance* instance);
     void setAngle(uint16_t angle);
+
+    renderer::VulkanApplication& renderer();
 
 public slots:
     void setFullscreen();

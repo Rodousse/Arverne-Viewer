@@ -241,6 +241,104 @@ VkSampleCountFlagBits getMaxUsableSampleCount(const VkPhysicalDeviceProperties&
     return VK_SAMPLE_COUNT_1_BIT;
 }
 
+
+VkFormat mapDataImageFormatToVkFormat(const data::ImageFormat& format)
+{
+    using data::ImageFormat;
+
+    switch(format)
+    {
+        case ImageFormat::LUM8:
+            return VK_FORMAT_R8_UNORM;
+
+        case ImageFormat::LUM16:
+            return VK_FORMAT_R16_UNORM;
+
+        case ImageFormat::LUM32:
+            return VK_FORMAT_R32_SFLOAT;
+
+        case ImageFormat::LUMA8:
+            return VK_FORMAT_R8G8_UNORM;
+
+        case ImageFormat::LUMA16:
+            return VK_FORMAT_R16G16_UNORM;
+
+        case ImageFormat::LUMA32:
+            return VK_FORMAT_R32G32_SFLOAT;
+
+        case ImageFormat::RGB8:
+            return VK_FORMAT_R8G8B8_UNORM;
+
+        case ImageFormat::RGB16:
+            return VK_FORMAT_R16G16B16_UNORM;
+
+        case ImageFormat::RGB32:
+            return VK_FORMAT_R32G32B32_SFLOAT;
+
+        case ImageFormat::RGBA8:
+            return VK_FORMAT_R8G8B8A8_UNORM;
+
+        case ImageFormat::RGBA16:
+            return VK_FORMAT_R16G16B16A16_UNORM;
+
+        case ImageFormat::RGBA32:
+            return VK_FORMAT_R32G32B32A32_SFLOAT;
+
+        default:
+            throw std::invalid_argument("[mapDataImageFormatToVkFormat] : Can't cast VK_FORMAT " +
+                                        std::to_string(int(format)) + " to an undefined data type");
+    }
+}
+
+data::ImageFormat mapVkFormatToDataImageFormat(const VkFormat& format)
+{
+    using data::ImageFormat;
+
+    switch(format)
+    {
+        case VK_FORMAT_R8_UNORM:
+            return ImageFormat::LUM8;
+
+        case VK_FORMAT_R16_UNORM:
+            return ImageFormat::LUM16;
+
+        case VK_FORMAT_R32_SFLOAT:
+            return ImageFormat::LUM32;
+
+        case VK_FORMAT_R8G8_UNORM:
+            return ImageFormat::LUMA8;
+
+        case VK_FORMAT_R16G16_UNORM:
+            return ImageFormat::LUMA16;
+
+        case VK_FORMAT_R32G32_SFLOAT:
+            return ImageFormat::LUMA32;
+
+        case VK_FORMAT_R8G8B8_UNORM:
+            return ImageFormat::RGB8;
+
+        case VK_FORMAT_R16G16B16_UNORM:
+            return ImageFormat::RGB16;
+
+        case VK_FORMAT_R32G32B32_SFLOAT:
+            return ImageFormat::RGB32;
+
+        case VK_FORMAT_R8G8B8A8_UNORM:
+            return ImageFormat::RGBA8;
+
+        case VK_FORMAT_R16G16B16A16_UNORM:
+            return ImageFormat::RGBA16;
+
+        case VK_FORMAT_R32G32B32A32_SFLOAT:
+            return ImageFormat::RGBA32;
+
+        default:
+            throw std::invalid_argument("[mapVkFormatToDataImageFormat] : Can't cast VK_FORMAT " +
+                                        std::to_string(format) + " to an undefined data type");
+
+    }
+}
+
 }
 
 }

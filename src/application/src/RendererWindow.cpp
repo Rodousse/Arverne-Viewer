@@ -1,89 +1,21 @@
 #include "application/RendererWindow.h"
+#include <qcoreapplication.h>
 #include <time.h>
 #include <defines.h>
 
 
 
 RendererWindow::RendererWindow():
-    modelManager_(&vkCore_)
+    renderer_()
 {
-    setSurfaceType(VulkanSurface);
-    vkCore_.setCamera(camera_);
+    QWindow::setSurfaceType(VulkanSurface);
+    renderer_.setCamera(camera_);
 }
 
 
-RendererWindow::~RendererWindow()
+renderer::VulkanApplication& RendererWindow::renderer()
 {
-    setName("Arverne Viewer");
-}
-
-void RendererWindow::initCore()
-{
-    //Adding required extensions for the application
-    std::vector<const char*> extensions;
-    //Strictly needed by qt
-    extensions.push_back("VK_KHR_surface");
-#ifdef UNIX_
-    extensions.push_back("VK_KHR_xcb_surface");
-#elif WIN32_
-    extensions.push_back("VK_KHR_win32_surface");
-#endif
-    extensions.push_back("VK_EXT_debug_report"); // enable debug as qt log
-    vkCore_.addRequiredExtensions(extensions.data(), static_cast<uint32_t>(extensions.size()));
-
-
-    //Set which device features are needed
-    VkPhysicalDeviceFeatures neededFeatures = {};
-    neededFeatures.samplerAnisotropy = VK_TRUE;
-    neededFeatures.geometryShader = VK_TRUE;
-    neededFeatures.sampleRateShading = VK_TRUE;
-
-    vkCore_.setPhysicalDeviceFeaturesRequired(neededFeatures);
-
-    vkCore_.createInstance();
-}
-
-void RendererWindow::initWindow()
-{
-    createSurface();
-    vkCore_.resizeExtent(size().width(), size().height());
-    vkCore_.initVulkan();
-    drawFrame();
-}
-
-
-void RendererWindow::initInstance(QVulkanInstance* instance)
-{
-    initCore();
-    instance->setVkInstance(vkCore_.getInstance());
-}
-
-
-void RendererWindow::createSurface()
-{
-    VkSurfaceKHR surface;
-    surface = vulkanInstance()->surfaceForWindow(this);
-    vkCore_.setSurface(surface);
-}
-
-void RendererWindow::resizeWindow(int width, int height)
-{
-    windowResized_ = true;
-
-    if(width != 0 && height != 0)
-    {
-        vkCore_.resizeExtent(width, height);
-    }
-}
-
-void RendererWindow::drawFrame()
-{
-    //If the surface on which we are drawing on isn't the same as the one provided by the window, we stop drawing
-    if(vulkanInstance()->surfaceForWindow(this))
-    {
-        vkCore_.drawFrame();
-        requestUpdate();
-    }
+    return renderer_;
 }
 
 void RendererWindow::resizeEvent(QResizeEvent* e)
@@ -92,7 +24,7 @@ void RendererWindow::resizeEvent(QResizeEvent* e)
 
     if(e->size() != e->oldSize())
     {
-        resizeWindow(e->size().width(), e->size().height());
+        renderer_.resizeWindow(e->size().width(), e->size().height());
     }
 }
 
@@ -135,8 +67,9 @@ void RendererWindow::exposeEvent(QExposeEvent*)
         if(!initialized_)
         {
             initialized_ = true;
-            initWindow();
-            drawFrame();
+            renderer_.create(QVulkanInstance::surfaceForWindow(this));
+            renderer_.resizeWindow(width(), height());
+            requestUpdate();
         }
     }
 }
@@ -147,7 +80,8 @@ bool RendererWindow::event(QEvent* e)
 
     if(e->type() == QEvent::UpdateRequest)
     {
-        drawFrame();
+        renderer_.drawFrame();
+        requestUpdate();
     }
 
     switch(e->type())
@@ -210,29 +144,29 @@ bool RendererWindow::event(QEvent* e)
         processWheelEvent(static_cast<const QWheelEvent*>(e));
     }
 
+    if(e->type() == QEvent::PlatformSurface
+       && static_cast<const QPlatformSurfaceEvent*>(e)->surfaceEventType() ==
+       QPlatformSurfaceEvent::SurfaceAboutToBeDestroyed)// Surface to be destroyed
+    {
+        QCoreApplication::processEvents();// We assume this is the end of the application and process it
+        renderer_.cleanup(); // Cleanup the renderer
+    }
+
     if(cameraUpdate)
     {
-        vkCore_.setCamera(camera_);
+        renderer_.setCamera(camera_);
     }
 
     return QWindow::event(e);
 }
 
-ModelManager& RendererWindow::getModelManager()
-{
-    return modelManager_;
-}
 
-const ModelManager& RendererWindow::getModelManager() const
-{
-    return modelManager_;
-}
 
 void RendererWindow::resetCamera()
 {
     camera_.setCenter(glm::vec3(0.0));
     camera_.setRadius(5.0f);
-    vkCore_.setCamera(camera_);
+    renderer_.setCamera(camera_);
 }
 
 

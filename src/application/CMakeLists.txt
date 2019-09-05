@@ -4,14 +4,12 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(HEADERS
     include/application/MainWindow.h
-    include/application/ModelManager.h
     include/application/RendererWindow.h
 )
 
 set(SOURCES
     src/main.cpp
     src/MainWindow.cpp
-    src/ModelManager.cpp
     src/RendererWindow.cpp
 )
 

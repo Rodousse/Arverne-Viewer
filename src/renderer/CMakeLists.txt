@@ -3,14 +3,15 @@
 set(HEADERS
     include/renderer/camera/ArcBallCamera.h
     include/renderer/camera/Camera.h
-    include/renderer/texture/MaterialTexture.h
-    include/renderer/texture/Texture2D.h
+    include/renderer/texture/Texture2D.hpp
     include/renderer/tools/CommandTools.h
     include/renderer/tools/ImageTools.h
     include/renderer/tools/MemoryTools.h
     include/renderer/DebugMessenger.h
+    include/renderer/GraphicsPipeline.h
     include/renderer/Material.h
     include/renderer/Model.h
+    include/renderer/ModelManager.h
     include/renderer/PhysicalDeviceProperties.h
     include/renderer/PhysicalDeviceProvider.h
     include/renderer/Swapchain.h
@@ -23,14 +24,14 @@ set(HEADERS
 set(SOURCES
     src/camera/ArcBallCamera.cpp
     src/camera/Camera.cpp
-    src/texture/MaterialTexture.cpp
-    src/texture/Texture2D.cpp
     src/tools/CommandTools.cpp
     src/tools/ImageTools.cpp
     src/tools/MemoryTools.cpp
     src/DebugMessenger.cpp
+    src/GraphicsPipeline.cpp
     src/Material.cpp
     src/Model.cpp
+    src/ModelManager.cpp
     src/PhysicalDeviceProperties.cpp
     src/PhysicalDeviceProvider.cpp
     src/Swapchain.cpp
@@ -61,5 +62,5 @@ COMMAND $ENV{VULKAN_SDK}/bin/glslangValidator -o ${SHADER_PATH}/frag.spv -V ${SH
 add_library(renderer STATIC ${SOURCES} ${HEADERS} ${SHADER_FILES})
 add_dependencies(renderer compileShaders)
 target_link_libraries(renderer Vulkan::Vulkan loader data)
-target_include_directories(renderer PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include ${STB_INCLUDE_DIR} ${GLM_INCLUDE_DIR} ${PLOG_INCLUDE_DIR})
+target_include_directories(renderer PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include ${GLM_INCLUDE_DIR} ${PLOG_INCLUDE_DIR})
 

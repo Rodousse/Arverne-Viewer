@@ -49,6 +49,8 @@ void Model::destroy()
             destroyMeshData(meshData);
         }
 
+        meshesData_.clear();
+
         isCreated_ = false;
     }
 }
@@ -163,7 +165,7 @@ void Model::createVertexIndexBuffer(const data::Mesh& mesh,
 //    defaultMaterial = &material;
 //}
 
-const std::string& Model::getName() const
+const std::string& Model::name() const
 {
     return name_;
 }
@@ -173,12 +175,12 @@ void Model::setName(const std::string& name)
     name_ = name;
 }
 
-const std::vector<MeshData>& Model::getMeshData() const
+const std::vector<MeshData>& Model::meshData() const
 {
     return meshesData_;
 }
 
-const std::vector<data::Mesh>& Model::getMeshes() const
+const std::vector<data::Mesh>& Model::meshes() const
 {
     return meshes_;
 }

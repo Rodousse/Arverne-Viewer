@@ -88,8 +88,6 @@ bool ObjLoader::load(const std::string& path, std::vector<data::Mesh>& scene)
 
         newMsh.name = shape.name;
 
-        data::VertexAttribute vertex;
-
         for(size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++)
         {
             int fv = shape.mesh.num_face_vertices[f];

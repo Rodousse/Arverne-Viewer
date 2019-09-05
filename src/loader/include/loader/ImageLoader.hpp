@@ -2,10 +2,7 @@
 
 #include <iostream>
 #include "data/2D/Image.hpp"
-#ifndef STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-#endif
+#include <exception>
 
 
 namespace
@@ -36,6 +33,9 @@ constexpr int deduceSTBIType(const data::ImageFormat& format)
         case ImageFormat::RGBA16:
         case ImageFormat::RGBA32:
             return STBI_rgb_alpha;
+
+        default:
+            throw std::invalid_argument("[deduceSTBIType] : Can't deduce STB Type from value ImageFormat ");
     }
 
 }

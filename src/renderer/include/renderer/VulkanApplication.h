@@ -1,6 +1,7 @@
 #pragma once
 
-#include "VulkanCore.h"
+#include "renderer/VulkanCore.h"
+#include "renderer/ModelManager.h"
 #include <string>
 #include <memory>
 
@@ -11,23 +12,25 @@ class VulkanApplication
 {
 protected:
     VulkanCore vkCore_;
-    std::string name_;
+    ModelManager modelManager_;
 
-    virtual void initCore() = 0;
-    virtual void initWindow() = 0;
-    virtual void createSurface() = 0;
-    virtual void resizeWindow(int width, int height) = 0; //TODO
-    virtual void drawFrame() = 0;
-    virtual void mainLoop() = 0;
+    virtual void createInstance();
+    virtual void initWindow();
 
 public:
     VulkanApplication();
-    virtual ~VulkanApplication();
+    virtual ~VulkanApplication() = default;
 
-    void setName(const std::string& name);
-    const std::string& getName()const;
+    void create(VkSurfaceKHR surface);
 
-    virtual void run() = 0;
+    virtual void drawFrame();
+    void resizeWindow(int width, int height);
+    void cleanup();
+
+    ModelManager& modelManager();
+    void setModelManager(const ModelManager& modelManager);
+    void setCamera(const Camera& camera);
+    VkInstance vkInstance() const;
 };
 
 }

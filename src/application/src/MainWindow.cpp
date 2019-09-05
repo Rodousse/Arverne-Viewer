@@ -8,12 +8,12 @@ void MainWindow::refreshModelSelection()
 {
     modelSelection_->clear();
 
-    for(auto model : renderer_->getModelManager().getModels())
+    for(auto model : rendererWindow_->renderer().modelManager().getModels())
     {
-        modelSelection_->addItem(QString::fromStdString(model.getName()));
+        modelSelection_->addItem(QString::fromStdString(model.name()));
     }
 
-    modelSelection_->setCurrentIndex(renderer_->getModelManager().getModels().size() - 1);
+    modelSelection_->setCurrentIndex(rendererWindow_->renderer().modelManager().getModels().size() - 1);
 }
 
 void MainWindow::loadObjFile()
@@ -23,8 +23,8 @@ void MainWindow::loadObjFile()
 
     if(filePath.size())
     {
-        renderer_->getModelManager().loadNewMesh(filePath.toStdString());
-        renderer_->resetCamera();
+        rendererWindow_->renderer().modelManager().loadNewMesh(filePath.toStdString());
+        rendererWindow_->resetCamera();
     }
 
     refreshModelSelection();
@@ -36,12 +36,12 @@ void MainWindow::changeModelSelected(int index)
     if(index < 0) // no index selected
         return;
 
-    renderer_->getModelManager().setSelectedModel(index);
-    renderer_->resetCamera();
+    rendererWindow_->renderer().modelManager().setSelectedModel(index);
+    rendererWindow_->resetCamera();
 }
 
 MainWindow::MainWindow(QWindow* vulkanWindow):
-    renderer_(reinterpret_cast<RendererWindow*>(vulkanWindow))
+    rendererWindow_(reinterpret_cast<RendererWindow*>(vulkanWindow))
 {
 
     QGridLayout* layout = new QGridLayout(this);
@@ -70,7 +70,7 @@ MainWindow::MainWindow(QWindow* vulkanWindow):
     layout->setColumnStretch(1, 1);
 
     connect(browse, SIGNAL(clicked()), this, SLOT(loadObjFile()));
-    connect(fullScreen, SIGNAL(clicked()), renderer_, SLOT(setFullscreen()));
+    connect(fullScreen, SIGNAL(clicked()), rendererWindow_, SLOT(setFullscreen()));
     connect(modelSelection_, SIGNAL(currentIndexChanged(int)), this, SLOT(changeModelSelected(int)));
 
     setLayout(layout);

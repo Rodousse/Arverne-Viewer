@@ -10,7 +10,7 @@ class MainWindow : public QWidget
 {
     Q_OBJECT
 private:
-    RendererWindow* renderer_;
+    RendererWindow* rendererWindow_;
     QComboBox* modelSelection_;
 
     void refreshModelSelection();

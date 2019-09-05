@@ -10,15 +10,18 @@
 #include <plog/Log.h>
 #include <vulkan/vulkan.h>
 #include <vector>
+#include <memory>
 #include <glm/mat4x4.hpp>
 #include <glm/vec3.hpp>
 #include "renderer/DebugMessenger.h"
+#include "renderer/GraphicsPipeline.h"
 #include "renderer/PhysicalDeviceProvider.h"
 #include "renderer/Swapchain.h"
 #include "renderer/Vertex.h"
-#include "renderer/texture/MaterialTexture.h"
 #include "renderer/camera/Camera.h"
 #include "renderer/Model.h"
+#include "renderer/texture/Texture2D.hpp"
+#include "loader/ImageLoader.hpp"
 
 namespace renderer
 {
@@ -73,12 +76,10 @@ protected :
     Swapchain swapchain_;
 
     VkRenderPass renderPass_;
-    VkDescriptorSetLayout descriptorSetLayout_;
-    VkDescriptorPool descriptorPool_;
-    std::vector<VkDescriptorSet> descriptorSets_;
-    VkPipelineLayout pipelineLayout_;
-    VkPipeline graphicsPipeline_;
     VkViewport viewport_;
+
+    Pipeline pipelineMain_;
+    Pipeline pipelineCubeMap_;
 
     VkCommandPool commandPool_;
     VkCommandPool commandPoolTransfert_;
@@ -116,9 +117,8 @@ protected :
 
     /******************************************* APPLICATION VARIABLE ******************************************************/
 
-    MaterialTexture lenaTexture_;
+    std::shared_ptr<Texture2D<VK_FORMAT_R8G8B8A8_UNORM>> lenaTexture_;
     Camera camera_;
-    std::vector<data::Mesh> meshes_;
     Model model_;
     ApplicationStateChange applicationChanges_;
 
@@ -137,10 +137,11 @@ protected :
     void createRenderPass();
     void createGraphicsPipeline();
     void createCommandPool();
-    void createCommandBuffers();
     void createDepthRessources();
     void createColorRessources();
 
+
+    void createCommandBuffers();
     void recreateCommandBuffer();
 
     //Shader Loading and Creation
@@ -150,8 +151,6 @@ protected :
 
     // Buffer Management
 
-    void createVertexBuffer();
-    void createVertexIndexBuffer();
     void createUniformBuffer();
     void updateUniformBuffer(uint32_t imageIndex);
 
@@ -165,7 +164,6 @@ protected :
     void createSyncObjects();
     void checkApplicationState();
 
-    void cleanup();
 
 public:
     VulkanCore();
@@ -197,6 +195,9 @@ public:
     void setModel(const Model& model);
 
     void drawFrame();
+
+
+    void cleanup();
 
     /***********************************************************************************************************************/
 

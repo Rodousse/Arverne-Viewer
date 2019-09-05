@@ -1,7 +1,7 @@
 #include "renderer/VulkanCore.h"
+#include "renderer/tools/CommandTools.h"
 #include "renderer/tools/ImageTools.h"
 #include "renderer/tools/MemoryTools.h"
-#include "renderer/tools/CommandTools.h"
 #include <algorithm>
 #include <set>
 #include <array>
@@ -17,7 +17,6 @@ namespace renderer
 VulkanCore::VulkanCore():
     debugMessenger_(this, &instance_),
     swapchain_(this),
-    lenaTexture_(this, std::string(RESOURCE_PATH) + "/textures/default.bmp", VK_FORMAT_R8G8B8A8_UNORM),
     model_(this)
 {
     if(ENABLE_VALIDATION_LAYERS)
@@ -123,9 +122,11 @@ void VulkanCore::initVulkan()
     createDepthRessources();
     createColorRessources();
     swapchain_.createFramebuffers(renderPass_, {colorImageView_, depthImageView_});
-    lenaTexture_.create();
-//  createVertexBuffer();
-//  createVertexIndexBuffer();
+    auto texture = std::make_shared<data::Image<unsigned char>>
+                   (loader::loadImage<data::ImageFormat::RGBA8>(
+                        std::string(RESOURCE_PATH) + "/textures/default.bmp"));
+    lenaTexture_ = std::make_shared<Texture2D<VK_FORMAT_R8G8B8A8_UNORM>>(*this, texture);
+    model_.create();
     createUniformBuffer();
     createDescriptorPool();
     createDescriptorSets();
@@ -287,7 +288,7 @@ void VulkanCore::setModel(const Model& model)
 {
     applicationChanges_.modelModified = true;
     model_.destroy();
-    model_ = model;
+    model_.assignMesh(model.meshes());
     model_.create();
 }
 
@@ -528,7 +529,7 @@ void VulkanCore::createDescriptorSetLayout()
     layoutInfo.pBindings = bindings.data();
 
     if(vkCreateDescriptorSetLayout(logicalDevice_, &layoutInfo, nullptr,
-                                   &descriptorSetLayout_) != VK_SUCCESS)
+                                   &pipelineMain_.descriptorSetLayout) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create descriptor set layout!");
     }
@@ -573,92 +574,35 @@ void VulkanCore::createGraphicsPipeline()
     vertexInputInfo.pVertexBindingDescriptions = &vertexBindingDescription;
     vertexInputInfo.vertexBindingDescriptionCount = 1;
 
-    VkPipelineInputAssemblyStateCreateInfo assemblyInfos = {};
-    assemblyInfos.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    assemblyInfos.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    assemblyInfos.primitiveRestartEnable = VK_FALSE;
 
-    viewport_ = {};
-    viewport_.x = 0;
-    viewport_.y = 0;
-    viewport_.width = (float)swapchain_.getExtent().width;
-    viewport_.height = (float)swapchain_.getExtent().height;
-    viewport_.minDepth = 0.0f;
-    viewport_.maxDepth = 1.0f;
 
-    //The scissor is masking the "out of the scissor rectangle" data from the viewport
-    VkRect2D scissor = {};
-    scissor.offset = { 0, 0 };
-    scissor.extent = swapchain_.getExtent();
-
-    VkPipelineViewportStateCreateInfo viewPortInfo = {};
-    viewPortInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    viewPortInfo.viewportCount = 1;
-    viewPortInfo.pScissors = &scissor;
-    viewPortInfo.scissorCount = 1;
-    viewPortInfo.pViewports = &viewport_;
-
-    VkPipelineRasterizationStateCreateInfo rasterizerInfo = {};
-    rasterizerInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    rasterizerInfo.rasterizerDiscardEnable = VK_FALSE;
-    rasterizerInfo.polygonMode = VK_POLYGON_MODE_FILL;
-    rasterizerInfo.lineWidth = 1.0f;
-    rasterizerInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-    rasterizerInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;// VK_FRONT_FACE_COUNTER_CLOCKWISE;
-    rasterizerInfo.depthBiasEnable = VK_FALSE;
-
-    VkPipelineMultisampleStateCreateInfo multiSampInfo = {};
-    multiSampInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    multiSampInfo.sampleShadingEnable = VK_TRUE;
-    multiSampInfo.rasterizationSamples = msaaSamples_;
-    multiSampInfo.minSampleShading = 0.2f;
-
-    VkPipelineDepthStencilStateCreateInfo stencilInfos = {};
-    stencilInfos.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
-    stencilInfos.depthCompareOp = VK_COMPARE_OP_LESS;
-    stencilInfos.depthTestEnable = VK_TRUE;
-    stencilInfos.depthWriteEnable = VK_TRUE;
-
-    //Color blend describe how we want to replace the color in the current framebuffer
-    VkPipelineColorBlendAttachmentState colorBlend = {};
-    colorBlend.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT
-                                | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-    colorBlend.blendEnable = VK_FALSE;
-    colorBlend.srcColorBlendFactor = VK_BLEND_FACTOR_ONE;
-    colorBlend.srcAlphaBlendFactor = VK_BLEND_FACTOR_ONE;
-    colorBlend.dstColorBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlend.dstAlphaBlendFactor = VK_BLEND_FACTOR_ZERO;
-    colorBlend.colorBlendOp = VK_BLEND_OP_ADD; //Seems to have pretty cool fast features here
-    colorBlend.alphaBlendOp = VK_BLEND_OP_ADD;
-
-    VkPipelineColorBlendStateCreateInfo colorBlendInfo = {};
-    colorBlendInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    colorBlendInfo.pAttachments = &colorBlend;
-    colorBlendInfo.logicOpEnable = VK_FALSE; // Use for bitwise operation
-    colorBlendInfo.logicOp = VK_LOGIC_OP_COPY;
-    colorBlendInfo.attachmentCount = 1;
-    //colorBlendInfo.blendConstants[0...4] = floatValue;
+    GraphicsPipelineCreateInfo graphicsPipelineInfo = {};
+    graphicsPipelineInfo.initDefaultValue();
 
     //This set which of the previous value can be dynamically change during runtime !!!
     VkDynamicState dynamicStates[] =
     {
         VK_DYNAMIC_STATE_LINE_WIDTH
     };
+    graphicsPipelineInfo.dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
+    graphicsPipelineInfo.dynamicState.pDynamicStates = dynamicStates;
+    graphicsPipelineInfo.dynamicState.dynamicStateCount = 1;
 
-    VkPipelineDynamicStateCreateInfo dynamicStateInfo = {};
-    dynamicStateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
-    dynamicStateInfo.pDynamicStates = dynamicStates;
-    dynamicStateInfo.dynamicStateCount = 1;
+    graphicsPipelineInfo.colorBlendState.logicOpEnable = VK_FALSE;
+    graphicsPipelineInfo.viewportState.viewport.width = float(swapchain_.getExtent().width);
+    graphicsPipelineInfo.viewportState.viewport.height = float(swapchain_.getExtent().height);
+    graphicsPipelineInfo.viewportState.scissor.extent = swapchain_.getExtent();
+    graphicsPipelineInfo.multisamplingState.sampleShadingEnable = VK_TRUE;
+    graphicsPipelineInfo.multisamplingState.minSampleShading = 0.2f;
+    graphicsPipelineInfo.multisamplingState.rasterizationSamples = msaaSamples_;
+    graphicsPipelineInfo.pipelineLayout.setLayoutCount = 1;
+    graphicsPipelineInfo.pipelineLayout.pSetLayouts = &pipelineMain_.descriptorSetLayout;
+    graphicsPipelineInfo.pipelineLayout.pushConstantRangeCount = 0;
+    graphicsPipelineInfo.pipelineLayout.pPushConstantRanges = nullptr;
 
-    VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
-    pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout_;
-    pipelineLayoutInfo.pushConstantRangeCount = 0;
-    pipelineLayoutInfo.pPushConstantRanges = nullptr;
 
-    if(vkCreatePipelineLayout(logicalDevice_, &pipelineLayoutInfo, nullptr,
-                              &pipelineLayout_) != VK_SUCCESS)
+    if(vkCreatePipelineLayout(logicalDevice_, &graphicsPipelineInfo.pipelineLayout, nullptr,
+                              &pipelineMain_.pipelineLayout) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create pipeline layout!");
     }
@@ -667,15 +611,15 @@ void VulkanCore::createGraphicsPipeline()
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.stageCount = 2;
     pipelineInfo.pStages = shaderStageInfos;
-    pipelineInfo.layout = pipelineLayout_;
-    pipelineInfo.pMultisampleState = &multiSampInfo;
-    pipelineInfo.pColorBlendState = &colorBlendInfo;
-    pipelineInfo.pDepthStencilState = &stencilInfos;
-    pipelineInfo.pDynamicState = &dynamicStateInfo;
-    pipelineInfo.pInputAssemblyState = &assemblyInfos;
-    pipelineInfo.pRasterizationState = &rasterizerInfo;
+    pipelineInfo.layout = pipelineMain_.pipelineLayout;
+    pipelineInfo.pMultisampleState = &graphicsPipelineInfo.multisamplingState;
+    pipelineInfo.pColorBlendState = &graphicsPipelineInfo.colorBlendState;
+    pipelineInfo.pDepthStencilState = &graphicsPipelineInfo.depthStencilState;
+    pipelineInfo.pDynamicState = &graphicsPipelineInfo.dynamicState;
+    pipelineInfo.pInputAssemblyState = &graphicsPipelineInfo.inputAssemblyState;
+    pipelineInfo.pRasterizationState = &graphicsPipelineInfo.rasterizerState;
     pipelineInfo.pVertexInputState = &vertexInputInfo;
-    pipelineInfo.pViewportState = &viewPortInfo;
+    pipelineInfo.pViewportState = &graphicsPipelineInfo.viewportState.viewportState;
     pipelineInfo.renderPass = renderPass_;
     pipelineInfo.subpass = 0;
     //We can make pipeline derivates from other pipelines if they have similarities
@@ -683,8 +627,10 @@ void VulkanCore::createGraphicsPipeline()
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
     pipelineInfo.basePipelineIndex = -1;
 
+
+
     if(vkCreateGraphicsPipelines(logicalDevice_, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr,
-                                 &graphicsPipeline_) != VK_SUCCESS)
+                                 &pipelineMain_.graphicsPipeline) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
@@ -762,69 +708,6 @@ void VulkanCore::recreateCommandBuffer()
     createCommandBuffers();
 }
 
-void VulkanCore::createVertexBuffer()
-{
-    PLOGD << "Creating and Allocating Vertex Buffer" << '\n';
-    VkDeviceSize bufferSize = sizeof(meshes_[0].vertices[0]) * meshes_[0].vertices.size();
-    VkBufferUsageFlags usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-    VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-
-    tools::memory::createBuffer(*this, bufferSize, usage, properties, stagingBuffer,
-                                stagingBufferMemory);
-
-    void* pData;//Contains a pointer to the mapped memory
-
-    //Documentation : memory must have been created with a memory type that reports VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-    //                  flags is reserved for future use of the vulkanAPI.
-    vkMapMemory(logicalDevice_, stagingBufferMemory, 0, bufferSize, 0, &pData);
-    memcpy(pData, meshes_[0].vertices.data(), (size_t)bufferSize);
-    vkUnmapMemory(logicalDevice_, stagingBufferMemory);
-
-    tools::memory::createBuffer(*this, bufferSize,
-                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer_, vertexBufferMemory_);
-    tools::memory::copyBuffer(*this, stagingBuffer, vertexBuffer_, bufferSize);
-
-    vkDestroyBuffer(logicalDevice_, stagingBuffer, nullptr);
-    vkFreeMemory(logicalDevice_, stagingBufferMemory, nullptr);
-    PLOGD << "Vertex Buffer Created" << '\n';
-}
-
-void VulkanCore::createVertexIndexBuffer()
-{
-
-    PLOGD << "Creating and Allocating Index Buffer" << '\n';
-    VkDeviceSize bufferSize = sizeof(meshes_[0].indices[0]) * meshes_[0].indices.size();
-    VkBufferUsageFlags usage = VK_BUFFER_USAGE_INDEX_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
-    VkMemoryPropertyFlags properties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
-    VkBuffer stagingBuffer;
-    VkDeviceMemory stagingBufferMemory;
-
-    tools::memory::createBuffer(*this, bufferSize, usage, properties, stagingBuffer,
-                                stagingBufferMemory);
-
-    void* pData;//Contains a pointer to the mapped memory
-
-    //Documentation : memory must have been created with a memory type that reports VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
-    //                  flags is reserved for future use of the vulkanAPI.
-    vkMapMemory(logicalDevice_, stagingBufferMemory, 0, bufferSize, 0, &pData);
-    memcpy(pData, meshes_[0].indices.data(), (size_t)bufferSize);
-    vkUnmapMemory(logicalDevice_, stagingBufferMemory);
-
-    tools::memory::createBuffer(*this, bufferSize,
-                                VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                                VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexIndexBuffer_, vertexIndexBufferMemory_);
-    tools::memory::copyBuffer(*this, stagingBuffer, vertexIndexBuffer_, bufferSize);
-
-    vkDestroyBuffer(logicalDevice_, stagingBuffer, nullptr);
-    vkFreeMemory(logicalDevice_, stagingBufferMemory, nullptr);
-    PLOGD << "Index Buffer Created" << '\n';
-}
-
 void VulkanCore::createUniformBuffer()
 {
     PLOGD << "Creating Uniform Buffer..." << '\n';
@@ -895,7 +778,8 @@ void VulkanCore::createDescriptorPool()
     descPoolInfo.pPoolSizes = descPoolSizes.data();
     descPoolInfo.maxSets = static_cast<uint32_t>(swapchain_.getImages().size());
 
-    if(vkCreateDescriptorPool(logicalDevice_, &descPoolInfo, nullptr, &descriptorPool_) != VK_SUCCESS)
+    if(vkCreateDescriptorPool(logicalDevice_, &descPoolInfo, nullptr,
+                              &pipelineMain_.descriptorPool) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to create descriptor pool!");
     }
@@ -906,16 +790,18 @@ void VulkanCore::createDescriptorPool()
 void VulkanCore::createDescriptorSets()
 {
     PLOGD << "Creating Descriptor Sets..." << '\n';
-    std::vector<VkDescriptorSetLayout> layouts(swapchain_.getImages().size(), descriptorSetLayout_);
+    std::vector<VkDescriptorSetLayout> layouts(swapchain_.getImages().size(),
+            pipelineMain_.descriptorSetLayout);
     VkDescriptorSetAllocateInfo descAlloc = {};
     descAlloc.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    descAlloc.descriptorPool = descriptorPool_;
+    descAlloc.descriptorPool = pipelineMain_.descriptorPool;
     descAlloc.descriptorSetCount = static_cast<uint32_t>(swapchain_.getImages().size());
     descAlloc.pSetLayouts = layouts.data();
 
-    descriptorSets_.resize(swapchain_.getImages().size());
+    pipelineMain_.descriptorSets.resize(swapchain_.getImages().size());
 
-    if(vkAllocateDescriptorSets(logicalDevice_, &descAlloc, descriptorSets_.data()) != VK_SUCCESS)
+    if(vkAllocateDescriptorSets(logicalDevice_, &descAlloc,
+                                pipelineMain_.descriptorSets.data()) != VK_SUCCESS)
     {
         throw std::runtime_error("failed to allocate descriptor sets!");
     }
@@ -929,12 +815,12 @@ void VulkanCore::createDescriptorSets()
 
         VkDescriptorImageInfo imageInfo = {};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = lenaTexture_.getImageView();
-        imageInfo.sampler = lenaTexture_.getSampler();
+        imageInfo.imageView = lenaTexture_->imageView();
+        imageInfo.sampler = lenaTexture_->sampler();
 
         std::array<VkWriteDescriptorSet, 2> writeInfos = {};
         writeInfos[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writeInfos[0].dstSet = descriptorSets_[i];
+        writeInfos[0].dstSet = pipelineMain_.descriptorSets[i];
         writeInfos[0].dstBinding = 0; //binding index in "layout(binding = 0)"
         writeInfos[0].dstArrayElement = 0;
         writeInfos[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -942,7 +828,7 @@ void VulkanCore::createDescriptorSets()
         writeInfos[0].pBufferInfo = &descBufferInfo;
 
         writeInfos[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-        writeInfos[1].dstSet = descriptorSets_[i];
+        writeInfos[1].dstSet = pipelineMain_.descriptorSets[i];
         writeInfos[1].dstBinding = 1; //binding index in "layout(binding = 0)"
         writeInfos[1].dstArrayElement = 0;
         writeInfos[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -1008,19 +894,21 @@ void VulkanCore::createCommandBuffers()
         vkCmdBeginRenderPass(commandBuffers_[i], &renderBeginInfo,
                              VK_SUBPASS_CONTENTS_INLINE); // Last parameter used to embedd the command for a primary command buffer or secondary
 
-        for(uint32_t idxMesh = 0;  idxMesh < model_.getMeshes().size(); idxMesh++)
+        for(uint32_t idxMesh = 0;  idxMesh < model_.meshes().size(); idxMesh++)
         {
-            const MeshData& meshData = model_.getMeshData()[idxMesh];
-            const data::Mesh& mesh = model_.getMeshes()[idxMesh];
-            vkCmdBindPipeline(commandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline_);
+            const MeshData& meshData = model_.meshData()[idxMesh];
+            const data::Mesh& mesh = model_.meshes()[idxMesh];
+            vkCmdBindPipeline(commandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
+                              pipelineMain_.graphicsPipeline);
 
             VkBuffer vertexBuffers[] = { meshData.vertexBuffer };
             VkDeviceSize offsets[] = { 0 };
             vkCmdBindVertexBuffers(commandBuffers_[i], 0, 1, vertexBuffers, offsets);
 
             vkCmdBindIndexBuffer(commandBuffers_[i], meshData.vertexIndexBuffer, 0, VK_INDEX_TYPE_UINT32);
-            vkCmdBindDescriptorSets(commandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout_, 0, 1,
-                                    &descriptorSets_[i], 0, nullptr);
+            vkCmdBindDescriptorSets(commandBuffers_[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    pipelineMain_.pipelineLayout, 0, 1,
+                                    &pipelineMain_.descriptorSets[i], 0, nullptr);
 
             //1 used for the instanced rendering could be higher i think for multiple instanced
             vkCmdDrawIndexed(commandBuffers_[i], static_cast<uint32_t>(mesh.indices.size()), 1, 0, 0, 0);
@@ -1182,8 +1070,8 @@ void VulkanCore::cleanUpSwapChain()
     vkDestroyImage(logicalDevice_, colorImage_, nullptr);
     vkFreeMemory(logicalDevice_, colorMemory_, nullptr);
 
-    vkDestroyPipeline(logicalDevice_, graphicsPipeline_, nullptr);
-    vkDestroyPipelineLayout(logicalDevice_, pipelineLayout_, nullptr);
+    vkDestroyPipeline(logicalDevice_, pipelineMain_.graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(logicalDevice_, pipelineMain_.pipelineLayout, nullptr);
     vkDestroyRenderPass(logicalDevice_, renderPass_, nullptr);
     swapchain_.destroy();
 }
@@ -1196,10 +1084,10 @@ void VulkanCore::cleanup()
         cleanUpSwapChain();
 
         //Descriptor Set/Pool
-        vkDestroyDescriptorPool(logicalDevice_, descriptorPool_, nullptr);
-        vkDestroyDescriptorSetLayout(logicalDevice_, descriptorSetLayout_, nullptr);
+        vkDestroyDescriptorPool(logicalDevice_, pipelineMain_.descriptorPool, nullptr);
+        vkDestroyDescriptorSetLayout(logicalDevice_, pipelineMain_.descriptorSetLayout, nullptr);
 
-        lenaTexture_.destroy();
+        lenaTexture_.reset();
 
         //Vertex/Uniform/Index buffers
         for(size_t i = 0; i < swapchain_.getImages().size(); i++)
