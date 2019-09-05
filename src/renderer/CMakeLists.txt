@@ -19,6 +19,7 @@ set(HEADERS
     include/renderer/VkElement.h
     include/renderer/VulkanApplication.h
     include/renderer/VulkanCore.h
+    src/forward_declaration.h
 )
 
 set(SOURCES
@@ -62,5 +63,12 @@ COMMAND $ENV{VULKAN_SDK}/bin/glslangValidator -o ${SHADER_PATH}/frag.spv -V ${SH
 add_library(renderer STATIC ${SOURCES} ${HEADERS} ${SHADER_FILES})
 add_dependencies(renderer compileShaders)
 target_link_libraries(renderer Vulkan::Vulkan loader data)
-target_include_directories(renderer PUBLIC include ${CMAKE_CURRENT_BINARY_DIR}/include ${GLM_INCLUDE_DIR} ${PLOG_INCLUDE_DIR})
+target_include_directories(renderer
+PUBLIC
+    include
+    ${CMAKE_CURRENT_BINARY_DIR}/include
+    ${GLM_INCLUDE_DIR}
+    ${PLOG_INCLUDE_DIR}
+PRIVATE
+    src)
 

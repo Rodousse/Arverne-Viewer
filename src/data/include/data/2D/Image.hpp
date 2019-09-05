@@ -49,10 +49,7 @@ public:
     template<typename otherPixelType>
     Image(const Image<otherPixelType>& other) = delete;
 
-    template<typename otherPixelType>
-    Image(Image<otherPixelType>&& other);
-
-    template<> Image(Image<PixelType>&& other)
+    Image(Image&& other)
     {
         data_ = other.data_;
         width_ = other.width();

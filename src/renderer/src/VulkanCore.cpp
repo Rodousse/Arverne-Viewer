@@ -2,6 +2,7 @@
 #include "renderer/tools/CommandTools.h"
 #include "renderer/tools/ImageTools.h"
 #include "renderer/tools/MemoryTools.h"
+#include "renderer/texture/Texture2D.hpp"
 #include <algorithm>
 #include <set>
 #include <array>

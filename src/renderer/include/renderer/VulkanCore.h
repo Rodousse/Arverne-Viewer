@@ -7,6 +7,7 @@
 #define VK_USE_PLATFORM_XCB_KHR
 #endif
 
+#include "../../src/forward_declaration.h"
 #include <plog/Log.h>
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -20,7 +21,6 @@
 #include "renderer/Vertex.h"
 #include "renderer/camera/Camera.h"
 #include "renderer/Model.h"
-#include "renderer/texture/Texture2D.hpp"
 #include "loader/ImageLoader.hpp"
 
 namespace renderer
@@ -31,6 +31,7 @@ const bool ENABLE_VALIDATION_LAYERS = false;
 #else
 const bool ENABLE_VALIDATION_LAYERS = true;
 #endif
+
 
 class VulkanCore
 {
